@@ -112,3 +112,9 @@ func Unserialize(r io.Reader) (RawObject, error) {
 
 	return o, nil
 }
+
+type Object interface {
+	Type() ObjectType
+	Payload() []byte
+	FromPayload([]byte) error
+}
