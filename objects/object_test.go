@@ -86,3 +86,21 @@ func TestSerialize(t *testing.T) {
 		t.Errorf("Unexpected serialization result: %v", b)
 	}
 }
+
+func TestSerializeAndId(t *testing.T) {
+	o := Object{
+		Type:    OTBlob,
+		Payload: []byte("foo bar\nbaz"),
+	}
+
+	buf := new(bytes.Buffer)
+	id, err := o.SerializeAndId(buf, OIdAlgoDefault)
+
+	if err != nil {
+		t.Fatalf("Serialization failed:%s", err)
+	}
+
+	if !id.VerifyObject(o) {
+		t.Errorf("Verification failed")
+	}
+}

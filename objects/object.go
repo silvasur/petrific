@@ -7,10 +7,6 @@ import (
 	"strings"
 )
 
-type ObjectId interface {
-	fmt.Stringer
-}
-
 type ObjectType string
 
 const (
@@ -25,6 +21,7 @@ type Object struct {
 	Payload []byte
 }
 
+// SerialiteObject writes the binary representation of an object to a io.Writer
 func (o Object) Serialize(w io.Writer) error {
 	if _, err := fmt.Fprintf(w, "%s %d\n", o.Type, len(o.Payload)); err != nil {
 		return err
@@ -32,6 +29,16 @@ func (o Object) Serialize(w io.Writer) error {
 
 	_, err := w.Write(o.Payload)
 	return err
+}
+
+func (o Object) SerializeAndId(w io.Writer, algo ObjectIdAlgo) (ObjectId, error) {
+	gen := algo.Generator()
+
+	if err := o.Serialize(io.MultiWriter(w, gen)); err != nil {
+		return ObjectId{}, err
+	}
+
+	return gen.GetId(), nil
 }
 
 type UnserializeError struct {
@@ -65,6 +72,8 @@ func (br *bytewiseReader) ReadByte() (b byte, err error) {
 	return
 }
 
+// UnserializeObject attempts to read an object from a stream.
+// It is advisable to pass a buffered reader, if feasible.
 func UnserializeObject(r io.Reader) (Object, error) {
 	br := newBytewiseReader(r)
 
