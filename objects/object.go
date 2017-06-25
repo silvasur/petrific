@@ -16,13 +16,13 @@ const (
 	OTSnapshot ObjectType = "snapshot"
 )
 
-type Object struct {
+type RawObject struct {
 	Type    ObjectType
 	Payload []byte
 }
 
-// SerialiteObject writes the binary representation of an object to a io.Writer
-func (o Object) Serialize(w io.Writer) error {
+// Serialize writes the binary representation of an object to a io.Writer
+func (o RawObject) Serialize(w io.Writer) error {
 	if _, err := fmt.Fprintf(w, "%s %d\n", o.Type, len(o.Payload)); err != nil {
 		return err
 	}
@@ -31,7 +31,7 @@ func (o Object) Serialize(w io.Writer) error {
 	return err
 }
 
-func (o Object) SerializeAndId(w io.Writer, algo ObjectIdAlgo) (ObjectId, error) {
+func (o RawObject) SerializeAndId(w io.Writer, algo ObjectIdAlgo) (ObjectId, error) {
 	gen := algo.Generator()
 
 	if err := o.Serialize(io.MultiWriter(w, gen)); err != nil {
@@ -72,9 +72,9 @@ func (br *bytewiseReader) ReadByte() (b byte, err error) {
 	return
 }
 
-// UnserializeObject attempts to read an object from a stream.
+// Unserialize attempts to read an object from a stream.
 // It is advisable to pass a buffered reader, if feasible.
-func UnserializeObject(r io.Reader) (Object, error) {
+func Unserialize(r io.Reader) (RawObject, error) {
 	br := newBytewiseReader(r)
 
 	line := []byte{}
@@ -82,7 +82,7 @@ func UnserializeObject(r io.Reader) (Object, error) {
 	for {
 		b, err := br.ReadByte()
 		if err != nil {
-			return Object{}, UnserializeError{err}
+			return RawObject{}, UnserializeError{err}
 		}
 
 		if b == '\n' {
@@ -93,21 +93,21 @@ func UnserializeObject(r io.Reader) (Object, error) {
 
 	parts := strings.SplitN(string(line), " ", 2)
 	if len(parts) != 2 {
-		return Object{}, UnserializeError{}
+		return RawObject{}, UnserializeError{}
 	}
 
 	size, err := strconv.ParseUint(parts[1], 10, 64)
 	if err != nil {
-		return Object{}, UnserializeError{err}
+		return RawObject{}, UnserializeError{err}
 	}
 
-	o := Object{
+	o := RawObject{
 		Type:    ObjectType(parts[0]),
 		Payload: make([]byte, size),
 	}
 
 	if _, err := io.ReadFull(r, o.Payload); err != nil {
-		return Object{}, UnserializeError{err}
+		return RawObject{}, UnserializeError{err}
 	}
 
 	return o, nil

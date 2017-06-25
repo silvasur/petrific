@@ -101,7 +101,7 @@ func (h hashObjectIdGenerator) GetId() ObjectId {
 	}
 }
 
-func (oid ObjectId) VerifyObject(o Object) bool {
+func (oid ObjectId) VerifyObject(o RawObject) bool {
 	gen := oid.Algo.Generator()
 	if err := o.Serialize(gen); err != nil {
 		panic(err)

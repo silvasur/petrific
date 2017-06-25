@@ -9,7 +9,7 @@ import (
 func TestUnserializeSuccess(t *testing.T) {
 	r := bufio.NewReader(bytes.NewBuffer([]byte("blob 16\n0123456789abcdef")))
 
-	o, err := UnserializeObject(r)
+	o, err := Unserialize(r)
 	if err != nil {
 		t.Fatalf("Unserialize failed: %s", err)
 	}
@@ -26,7 +26,7 @@ func TestUnserializeSuccess(t *testing.T) {
 func TestUnserializeSuccess0Payload(t *testing.T) {
 	r := bufio.NewReader(bytes.NewBuffer([]byte("blob 0\n")))
 
-	o, err := UnserializeObject(r)
+	o, err := Unserialize(r)
 	if err != nil {
 		t.Fatalf("Unserialize failed: %s", err)
 	}
@@ -43,7 +43,7 @@ func TestUnserializeSuccess0Payload(t *testing.T) {
 func unserializeMustFail(b []byte, t *testing.T) {
 	r := bufio.NewReader(bytes.NewBuffer(b))
 
-	o, err := UnserializeObject(r)
+	o, err := Unserialize(r)
 	if err == nil {
 		t.Fatalf("Expected an error, but object was successfully read: %#v", o)
 	}
@@ -71,7 +71,7 @@ func TestUnserializePayloadTooSmall(t *testing.T) {
 }
 
 func TestSerialize(t *testing.T) {
-	o := Object{
+	o := RawObject{
 		Type:    OTBlob,
 		Payload: []byte("foo bar\nbaz"),
 	}
@@ -88,7 +88,7 @@ func TestSerialize(t *testing.T) {
 }
 
 func TestSerializeAndId(t *testing.T) {
-	o := Object{
+	o := RawObject{
 		Type:    OTBlob,
 		Payload: []byte("foo bar\nbaz"),
 	}
