@@ -22,16 +22,6 @@ var (
 		"blob=sha3-256:5555555555555555555555555555555555555555555555555555555555555555&size=50\n")
 )
 
-func genId(b byte) (oid ObjectId) {
-	oid.Algo = OIdAlgoSHA3_256
-	oid.Sum = make([]byte, OIdAlgoSHA3_256.sumLength())
-	for i := 0; i < OIdAlgoSHA3_256.sumLength(); i++ {
-		oid.Sum[i] = b
-	}
-
-	return
-}
-
 func TestSerializeFile(t *testing.T) {
 	have := testFileObj.Payload()
 
@@ -77,7 +67,7 @@ func TestUnserializeEmptyFile(t *testing.T) {
 	}
 }
 
-func TestUnserializeFailure(t *testing.T) {
+func TestUnserializeFileFailure(t *testing.T) {
 	subtests := []struct{ name, payload string }{
 		{"missing blob", "size=100\n"},
 		{"empty blob", "blob=&size=100"},

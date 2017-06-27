@@ -4,6 +4,16 @@ import (
 	"testing"
 )
 
+func genId(b byte) (oid ObjectId) {
+	oid.Algo = OIdAlgoSHA3_256
+	oid.Sum = make([]byte, OIdAlgoSHA3_256.sumLength())
+	for i := 0; i < OIdAlgoSHA3_256.sumLength(); i++ {
+		oid.Sum[i] = b
+	}
+
+	return
+}
+
 func TestParseValidId(t *testing.T) {
 	have, err := ParseObjectId("sha3-256:000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f")
 	if err != nil {
