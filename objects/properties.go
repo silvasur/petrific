@@ -11,14 +11,14 @@ import (
 // (only the characters [a-zA-Z0-9.:_-] are allowed, values are ordered by their key)
 type properties map[string]string
 
-// escapePropertyString escapes all bytes not in [a-zA-Z0-9.:_-] as %XX, where XX represents the hexadecimal value of the byte.
+// escapePropertyString escapes all bytes not in [a-zA-Z0-9.,:_-] as %XX, where XX represents the hexadecimal value of the byte.
 // Compatible with URL query strings
 func escapePropertyString(s string) []byte {
 	out := []byte{}
 	esc := []byte("%XX")
 
 	for _, b := range []byte(s) {
-		if (b >= 'a' && b <= 'z') || (b >= 'A' && b <= 'Z') || (b >= '0' && b <= '9') || b == '.' || b == ':' || b == '_' || b == '-' {
+		if (b >= 'a' && b <= 'z') || (b >= 'A' && b <= 'Z') || (b >= '0' && b <= '9') || b == '.' || b == ',' || b == ':' || b == '_' || b == '-' {
 			out = append(out, b)
 		} else {
 			hex.Encode(esc[1:], []byte{b})

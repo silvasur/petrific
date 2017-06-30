@@ -2,22 +2,65 @@ package objects
 
 import (
 	"bytes"
+	"code.laria.me/petrific/acl"
 	"testing"
 )
 
 var (
 	testTreeObj = Tree{
-		"foo": TreeEntryFile(genId(0x11)),
-		"bar": TreeEntryDir(genId(0x22)),
-		"baz": TreeEntrySymlink("/föö&bär/💾"), // Test special chars and unicode
-		"😃":   TreeEntryFile(genId(0x33)),
+		"foo": TreeEntryFile{
+			TreeEntryBase: TreeEntryBase{
+				acl:   acl.ACLFromUnixPerms(0644),
+				user:  "user1",
+				group: "group1",
+			},
+			Ref: genId(0x11),
+		},
+		"bar": TreeEntryDir{
+			TreeEntryBase: TreeEntryBase{
+				acl:   acl.ACLFromUnixPerms(0755),
+				user:  "user2",
+				group: "group2",
+			},
+			Ref: genId(0x22),
+		},
+		"baz": TreeEntrySymlink{
+			TreeEntryBase: TreeEntryBase{
+				acl:   acl.ACLFromUnixPerms(0644),
+				user:  "user3",
+				group: "group3",
+			},
+			Target: "/föö&bär/💾",
+		}, // Test special chars and unicode
+		"😃": TreeEntryFile{
+			TreeEntryBase: TreeEntryBase{
+				acl: acl.ACL{
+					User: acl.QualifiedPerms{
+						"":      acl.PermR | acl.PermW,
+						"user1": acl.PermR | acl.PermW,
+					},
+					Group: acl.QualifiedPerms{
+						"": acl.PermR,
+					},
+					Other: acl.QualifiedPerms{
+						"": acl.PermR,
+					},
+					Mask: acl.QualifiedPerms{
+						"": acl.PermR | acl.PermW,
+					},
+				},
+				user:  "user4",
+				group: "group4",
+			},
+			Ref: genId(0x33),
+		},
 	}
 
 	testTreeSerialization = []byte("" +
-		"name=%f0%9f%98%83&ref=sha3-256:3333333333333333333333333333333333333333333333333333333333333333&type=file\n" +
-		"name=bar&ref=sha3-256:2222222222222222222222222222222222222222222222222222222222222222&type=dir\n" +
-		"name=baz&target=%2ff%c3%b6%c3%b6%26b%c3%a4r%2f%f0%9f%92%be&type=symlink\n" +
-		"name=foo&ref=sha3-256:1111111111111111111111111111111111111111111111111111111111111111&type=file\n")
+		"acl=u::rw-,g::r--,o::r--&group=group1&name=foo&ref=sha3-256:1111111111111111111111111111111111111111111111111111111111111111&type=file&user=user1\n" +
+		"acl=u::rw-,g::r--,o::r--&group=group3&name=baz&target=%2ff%c3%b6%c3%b6%26b%c3%a4r%2f%f0%9f%92%be&type=symlink&user=user3\n" +
+		"acl=u::rw-,u:user1:rw-,g::r--,o::r--,m::rw-&group=group4&name=%f0%9f%98%83&ref=sha3-256:3333333333333333333333333333333333333333333333333333333333333333&type=file&user=user4\n" +
+		"acl=u::rwx,g::r-x,o::r-x&group=group2&name=bar&ref=sha3-256:2222222222222222222222222222222222222222222222222222222222222222&type=dir&user=user2\n")
 )
 
 func TestSerializeTree(t *testing.T) {

@@ -31,6 +31,20 @@ func (p Perm) String() string {
 
 type QualifiedPerms map[string]Perm
 
+func (a QualifiedPerms) Equals(b QualifiedPerms) bool {
+	if len(a) != len(b) {
+		return false
+	}
+
+	for k, va := range a {
+		if vb, ok := b[k]; !ok || vb != va {
+			return false
+		}
+	}
+
+	return true
+}
+
 type ACL struct {
 	User, Group, Other, Mask QualifiedPerms
 }
@@ -131,4 +145,11 @@ func ParseACL(s string) (ACL, error) {
 	}
 
 	return acl, nil
+}
+
+func (a ACL) Equals(b ACL) bool {
+	return a.User.Equals(b.User) &&
+		a.Group.Equals(b.Group) &&
+		a.Other.Equals(b.Other) &&
+		a.Mask.Equals(b.Mask)
 }
