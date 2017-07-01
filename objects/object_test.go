@@ -3,6 +3,7 @@ package objects
 import (
 	"bufio"
 	"bytes"
+	"fmt"
 	"testing"
 )
 
@@ -102,5 +103,66 @@ func TestSerializeAndId(t *testing.T) {
 
 	if !id.VerifyObject(o) {
 		t.Errorf("Verification failed")
+	}
+}
+
+func unserializeObj(t *testing.T, ot ObjectType, b []byte) Object {
+	ro, err := Unserialize(bytes.NewReader(b))
+	if err != nil {
+		t.Fatalf("Failed unserializing: %s", err)
+	}
+
+	o, err := ro.Object()
+	if err != nil {
+		t.Fatalf("Failed generating Object from RawObject: %s", err)
+	}
+
+	if o.Type() != ot {
+		t.Fatalf("Unexpected object type, have %s, want %s", o.Type(), ot)
+	}
+
+	return o
+}
+
+func TestUnserializeBlobObj(t *testing.T) {
+	blob := unserializeObj(t, OTBlob, []byte(""+
+		"blob 6\n"+
+		"foobar")).(*Blob)
+
+	if string(*blob) != "foobar" {
+		t.Errorf("Unexpected blob content: %v", blob)
+	}
+}
+
+func TestUnserializeFileObj(t *testing.T) {
+	file := unserializeObj(t, OTFile, append(
+		[]byte(fmt.Sprintf("file %d\n", len(testFileSerialization))),
+		testFileSerialization...,
+	)).(*File)
+
+	if !file.Equals(testFileObj) {
+		t.Errorf("Unexpected file object: %v", *file)
+	}
+}
+
+func TestUnserializeTreeObj(t *testing.T) {
+	tree := unserializeObj(t, OTTree, append(
+		[]byte(fmt.Sprintf("tree %d\n", len(testTreeSerialization))),
+		testTreeSerialization...,
+	)).(Tree)
+
+	if !tree.Equals(testTreeObj) {
+		t.Errorf("Unexpected tree object: %v", tree)
+	}
+}
+
+func TestUnserializeSnapshotObj(t *testing.T) {
+	snapshot := unserializeObj(t, OTSnapshot, append(
+		[]byte(fmt.Sprintf("snapshot %d\n", len(testSnapshotSerialization))),
+		testSnapshotSerialization...,
+	)).(*Snapshot)
+
+	if !snapshot.Equals(testSnapshotObj) {
+		t.Errorf("Unexpected snapshot object: %v", *snapshot)
 	}
 }

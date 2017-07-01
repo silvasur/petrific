@@ -118,3 +118,23 @@ type Object interface {
 	Payload() []byte
 	FromPayload([]byte) error
 }
+
+func (ro RawObject) Object() (o Object, err error) {
+	switch ro.Type {
+	case OTBlob:
+		o = new(Blob)
+	case OTFile:
+		o = new(File)
+	case OTTree:
+		o = make(Tree)
+	case OTSnapshot:
+		o = new(Snapshot)
+	default:
+		return nil, fmt.Errorf("Unknown object type %s", ro.Type)
+	}
+
+	if err = o.FromPayload(ro.Payload); err != nil {
+		o = nil
+	}
+	return
+}
