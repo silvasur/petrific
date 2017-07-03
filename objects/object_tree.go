@@ -41,6 +41,15 @@ type TreeEntryBase struct {
 	user, group string
 }
 
+func baseFromExec(exec bool) (base TreeEntryBase) {
+	if exec {
+		base.acl = acl.ACLFromUnixPerms(0755)
+	} else {
+		base.acl = acl.ACLFromUnixPerms(0644)
+	}
+	return
+}
+
 func (teb TreeEntryBase) ACL() acl.ACL {
 	return teb.acl
 }
@@ -54,11 +63,14 @@ func (teb TreeEntryBase) Group() string {
 }
 
 func (teb TreeEntryBase) toProperties() properties {
-	return properties{
-		"acl":   teb.acl.String(),
-		"user":  teb.user,
-		"group": teb.group,
+	props := properties{"acl": teb.acl.String()}
+	if teb.user != "" {
+		props["user"] = teb.user
 	}
+	if teb.group != "" {
+		props["group"] = teb.group
+	}
+	return props
 }
 
 func (a TreeEntryBase) equalContent(b TreeEntryBase) bool {
@@ -68,6 +80,13 @@ func (a TreeEntryBase) equalContent(b TreeEntryBase) bool {
 type TreeEntryFile struct {
 	TreeEntryBase
 	Ref ObjectId
+}
+
+func NewTreeEntryFile(ref ObjectId, exec bool) TreeEntryFile {
+	return TreeEntryFile{
+		TreeEntryBase: baseFromExec(exec),
+		Ref:           ref,
+	}
 }
 
 func (tef TreeEntryFile) Type() TreeEntryType {
@@ -90,6 +109,13 @@ type TreeEntryDir struct {
 	Ref ObjectId
 }
 
+func NewTreeEntryDir(ref ObjectId, exec bool) TreeEntryDir {
+	return TreeEntryDir{
+		TreeEntryBase: baseFromExec(exec),
+		Ref:           ref,
+	}
+}
+
 func (ted TreeEntryDir) Type() TreeEntryType {
 	return TETDir
 }
@@ -108,6 +134,13 @@ func (a TreeEntryDir) equalContent(_b TreeEntry) bool {
 type TreeEntrySymlink struct {
 	TreeEntryBase
 	Target string
+}
+
+func NewTreeEntrySymlink(target string, exec bool) TreeEntrySymlink {
+	return TreeEntrySymlink{
+		TreeEntryBase: baseFromExec(exec),
+		Target:        target,
+	}
 }
 
 func (tes TreeEntrySymlink) Type() TreeEntryType {

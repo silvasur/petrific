@@ -138,3 +138,7 @@ func (ro RawObject) Object() (o Object, err error) {
 	}
 	return
 }
+
+func ToRawObject(o Object) RawObject {
+	return RawObject{Type: o.Type(), Payload: o.Payload()}
+}

@@ -49,8 +49,6 @@ var (
 						"": acl.PermR | acl.PermW,
 					},
 				},
-				user:  "user4",
-				group: "group4",
 			},
 			Ref: genId(0x33),
 		},
@@ -59,7 +57,7 @@ var (
 	testTreeSerialization = []byte("" +
 		"acl=u::rw-,g::r--,o::r--&group=group1&name=foo&ref=sha3-256:1111111111111111111111111111111111111111111111111111111111111111&type=file&user=user1\n" +
 		"acl=u::rw-,g::r--,o::r--&group=group3&name=baz&target=%2ff%c3%b6%c3%b6%26b%c3%a4r%2f%f0%9f%92%be&type=symlink&user=user3\n" +
-		"acl=u::rw-,u:user1:rw-,g::r--,o::r--,m::rw-&group=group4&name=%f0%9f%98%83&ref=sha3-256:3333333333333333333333333333333333333333333333333333333333333333&type=file&user=user4\n" +
+		"acl=u::rw-,u:user1:rw-,g::r--,o::r--,m::rw-&name=%f0%9f%98%83&ref=sha3-256:3333333333333333333333333333333333333333333333333333333333333333&type=file\n" +
 		"acl=u::rwx,g::r-x,o::r-x&group=group2&name=bar&ref=sha3-256:2222222222222222222222222222222222222222222222222222222222222222&type=dir&user=user2\n")
 )
 
