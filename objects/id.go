@@ -68,6 +68,14 @@ func ParseObjectId(s string) (oid ObjectId, err error) {
 	return
 }
 
+func MustParseObjectId(s string) ObjectId {
+	id, err := ParseObjectId(s)
+	if err != nil {
+		panic(err)
+	}
+	return id
+}
+
 func (a ObjectId) Equals(b ObjectId) bool {
 	return a.Algo == b.Algo && bytes.Equal(a.Sum, b.Sum)
 }

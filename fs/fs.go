@@ -29,10 +29,13 @@ type RegularFile interface {
 type Dir interface {
 	File
 	Readdir() ([]File, error)
+	GetChild(name string) (File, error) // Must return os.ErrNotExist, if child doesn't exist
 
 	CreateChildFile(name string, exec bool) (RegularFile, error)
 	CreateChildDir(name string) (Dir, error)
 	CreateChildSymlink(name string, target string) (Symlink, error)
+
+	RenameChild(oldname, newname string) error
 }
 
 type Symlink interface {

@@ -3,8 +3,13 @@ package fs
 import (
 	"io"
 	"os"
+	"strings"
 	"time"
 )
+
+func pathJoin(parts ...string) string {
+	return strings.Join(parts, string(os.PathSeparator))
+}
 
 func openOSFile(path string) (osFile, error) {
 	fi, err := os.Lstat(path)
@@ -79,12 +84,21 @@ func (f osFile) Readdir() (list []File, err error) {
 		}
 
 		list = append(list, osFile{
-			fullpath: f.fullpath + string(os.PathSeparator) + fi.Name(),
+			fullpath: pathJoin(f.fullpath, fi.Name()),
 			fi:       fi,
 		})
 	}
 
 	return
+}
+
+func (f osFile) GetChild(name string) (File, error) {
+	path := pathJoin(f.fullpath, name)
+	fi, err := os.Lstat(path)
+	if err != nil {
+		return nil, err
+	}
+	return osFile{path, fi}, nil
 }
 
 func perms(executable bool) os.FileMode {
@@ -96,7 +110,7 @@ func perms(executable bool) os.FileMode {
 }
 
 func (f osFile) CreateChildFile(name string, exec bool) (RegularFile, error) {
-	p := f.fullpath + string(os.PathSeparator) + name
+	p := pathJoin(f.fullpath, name)
 
 	fh, err := os.OpenFile(p, os.O_RDWR|os.O_CREATE, perms(exec))
 	if err != nil {
@@ -108,7 +122,7 @@ func (f osFile) CreateChildFile(name string, exec bool) (RegularFile, error) {
 }
 
 func (f osFile) CreateChildDir(name string) (Dir, error) {
-	p := f.fullpath + string(os.PathSeparator) + name
+	p := pathJoin(f.fullpath, name)
 
 	if err := os.Mkdir(p, perms(true)); err != nil {
 		return nil, err
@@ -118,7 +132,7 @@ func (f osFile) CreateChildDir(name string) (Dir, error) {
 }
 
 func (f osFile) CreateChildSymlink(name string, target string) (Symlink, error) {
-	p := f.fullpath + string(os.PathSeparator) + name
+	p := pathJoin(f.fullpath, name)
 
 	err := os.Symlink(target, p)
 	if err != nil {
@@ -126,6 +140,10 @@ func (f osFile) CreateChildSymlink(name string, target string) (Symlink, error) 
 	}
 
 	return openOSFile(p)
+}
+
+func (f osFile) RenameChild(oldname, newname string) error {
+	return os.Rename(pathJoin(f.fullpath, oldname), pathJoin(f.fullpath, newname))
 }
 
 func (f osFile) Readlink() (string, error) {

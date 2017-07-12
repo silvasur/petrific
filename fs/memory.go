@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"errors"
 	"io"
+	"os"
 	"time"
 )
 
@@ -14,7 +15,13 @@ type memfsBase struct {
 	mtime  time.Time
 }
 
+type memfsChild interface {
+	File
+	setName(string)
+}
+
 func (b memfsBase) Name() string       { return b.name }
+func (b *memfsBase) setName(n string)  { b.name = n }
 func (b memfsBase) Executable() bool   { return b.exec }
 func (b memfsBase) ModTime() time.Time { return b.mtime }
 
@@ -45,13 +52,13 @@ func (f memfsFile) Write(p []byte) (int, error) {
 	return f.content.Write(p)
 }
 
-func (memfsBase) Close() error {
+func (memfsFile) Close() error {
 	return nil
 }
 
 type memfsDir struct {
 	memfsBase
-	children map[string]File
+	children map[string]memfsChild
 }
 
 func (memfsDir) Type() FileType { return FDir }
@@ -64,6 +71,14 @@ func (d memfsDir) Readdir() ([]File, error) {
 	}
 
 	return l, nil
+}
+
+func (d memfsDir) GetChild(name string) (File, error) {
+	c, ok := d.children[name]
+	if !ok {
+		return nil, os.ErrNotExist
+	}
+	return c, nil
 }
 
 func (d memfsDir) createChildBase(name string, exec bool) memfsBase {
@@ -80,17 +95,17 @@ func (d memfsDir) CreateChildFile(name string, exec bool) (RegularFile, error) {
 		memfsBase: d.createChildBase(name, exec),
 		content:   new(bytes.Buffer),
 	}
-	d.children[name] = child
-	return child, nil
+	d.children[name] = &child
+	return &child, nil
 }
 
 func (d memfsDir) CreateChildDir(name string) (Dir, error) {
 	child := memfsDir{
 		memfsBase: d.createChildBase(name, true),
-		children:  make(map[string]File),
+		children:  make(map[string]memfsChild),
 	}
-	d.children[name] = child
-	return child, nil
+	d.children[name] = &child
+	return &child, nil
 }
 
 func (d memfsDir) CreateChildSymlink(name string, target string) (Symlink, error) {
@@ -98,23 +113,37 @@ func (d memfsDir) CreateChildSymlink(name string, target string) (Symlink, error
 		memfsBase: d.createChildBase(name, false),
 		target:    target,
 	}
-	d.children[name] = child
-	return child, nil
+	d.children[name] = &child
+	return &child, nil
 }
 
 func (d *memfsDir) deleteChild(name string) {
 	delete(d.children, name)
 }
 
+func (d *memfsDir) RenameChild(oldname, newname string) error {
+	c, ok := d.children[oldname]
+	if !ok {
+		return os.ErrNotExist
+	}
+
+	c.setName(newname)
+
+	delete(d.children, oldname)
+	d.children[newname] = c
+
+	return nil
+}
+
 func NewMemoryFSRoot(name string) Dir {
-	return memfsDir{
+	return &memfsDir{
 		memfsBase: memfsBase{
 			parent: nil,
 			name:   name,
 			exec:   true,
 			mtime:  time.Now(),
 		},
-		children: make(map[string]File),
+		children: make(map[string]memfsChild),
 	}
 }
 
