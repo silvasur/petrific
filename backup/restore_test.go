@@ -107,3 +107,21 @@ func TestRestoreDir(t *testing.T) {
 		}))
 	})(t, root)
 }
+
+func TestRestoreLargeFile(t *testing.T) {
+	s := storage.NewMemoryStorage()
+	s.Set(objid_largefile_blob0, objects.OTBlob, obj_largefile_blob0)
+	s.Set(objid_largefile_blob1, objects.OTBlob, obj_largefile_blob1)
+	s.Set(objid_largefile, objects.OTFile, obj_largefile)
+
+	buf := new(bytes.Buffer)
+
+	if err := RestoreFile(s, objid_largefile, buf); err != nil {
+		t.Fatalf("Unexpected error while restoring file: %s", err)
+	}
+
+	have := buf.Bytes()
+	if !bytes.Equal(have, content_largefile) {
+		t.Errorf("Unexpected restoration result: %s", have)
+	}
+}

@@ -29,25 +29,18 @@ func wantObject(
 func TestWriteLargeFile(t *testing.T) {
 	s := storage.NewMemoryStorage()
 
-	id, err := WriteFile(s, bytes.NewReader(make([]byte, 2*BlobChunkSize+100)))
+	id, err := WriteFile(s, bytes.NewReader(content_largefile))
 	if err != nil {
 		t.Fatalf("Unexpected error when writing file: %s", err)
 	}
 
-	if id.String() != "sha3-256:ab7907ee6b45b343422a0354de500bcf99f5ff69fe8125be84e43d421803c34e" {
+	if !id.Equals(objid_largefile) {
 		t.Errorf("Unexpected file id: %s", id)
 	}
 
-	want_large_blob := append([]byte("blob 16777216\n"), make([]byte, BlobChunkSize)...)
-	want_small_blob := append([]byte("blob 100\n"), make([]byte, 100)...)
-	want_file := []byte("file 274\n" +
-		"blob=sha3-256:7287cbb09bdd8a0d96a6f6297413cd9d09a2763814636245a5a44120e6351be3&size=16777216\n" +
-		"blob=sha3-256:7287cbb09bdd8a0d96a6f6297413cd9d09a2763814636245a5a44120e6351be3&size=16777216\n" +
-		"blob=sha3-256:ddf124464f7b80e95f4a9c704f79e7037ff5d731648ba6b40c769893b428128c&size=100\n")
-
-	wantObject(t, s, objects.MustParseObjectId("sha3-256:ab7907ee6b45b343422a0354de500bcf99f5ff69fe8125be84e43d421803c34e"), want_file)
-	wantObject(t, s, objects.MustParseObjectId("sha3-256:7287cbb09bdd8a0d96a6f6297413cd9d09a2763814636245a5a44120e6351be3"), want_large_blob)
-	wantObject(t, s, objects.MustParseObjectId("sha3-256:ddf124464f7b80e95f4a9c704f79e7037ff5d731648ba6b40c769893b428128c"), want_small_blob)
+	wantObject(t, s, objid_largefile, obj_largefile)
+	wantObject(t, s, objid_largefile_blob0, obj_largefile_blob0)
+	wantObject(t, s, objid_largefile_blob1, obj_largefile_blob1)
 }
 
 func mkfile(t *testing.T, d fs.Dir, name string, exec bool, content []byte) {
