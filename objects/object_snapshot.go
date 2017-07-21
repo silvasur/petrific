@@ -10,10 +10,10 @@ import (
 )
 
 type Snapshot struct {
-	Tree      ObjectId
-	Date      time.Time
-	Container string
-	Comment   string
+	Tree    ObjectId
+	Date    time.Time
+	Archive string
+	Comment string
 }
 
 func (s Snapshot) Type() ObjectType {
@@ -29,7 +29,7 @@ func appendKVPair(b []byte, k, v string) []byte {
 }
 
 func (s Snapshot) Payload() (out []byte) {
-	out = appendKVPair(out, "container", s.Container)
+	out = appendKVPair(out, "archive", s.Archive)
 	out = appendKVPair(out, "date", s.Date.Format(time.RFC3339))
 	out = appendKVPair(out, "tree", s.Tree.String())
 
@@ -44,7 +44,7 @@ func (s Snapshot) Payload() (out []byte) {
 func (s *Snapshot) FromPayload(payload []byte) error {
 	r := bytes.NewBuffer(payload)
 
-	seenContainer := false
+	seenArchive := false
 	seenDate := false
 	seenTree := false
 
@@ -66,9 +66,9 @@ func (s *Snapshot) FromPayload(payload []byte) error {
 
 		headerval := strings.TrimSpace(parts[1])
 		switch parts[0] {
-		case "container":
-			s.Container = headerval
-			seenContainer = true
+		case "archive":
+			s.Archive = headerval
+			seenArchive = true
 		case "date":
 			d, err := time.Parse(time.RFC3339, headerval)
 			if err != nil {
@@ -90,8 +90,8 @@ func (s *Snapshot) FromPayload(payload []byte) error {
 		}
 	}
 
-	if !seenContainer || !seenDate || !seenTree {
-		return errors.New("Missing container, date or tree header")
+	if !seenArchive || !seenDate || !seenTree {
+		return errors.New("Missing archive, date or tree header")
 	}
 
 	b := new(bytes.Buffer)
@@ -105,7 +105,7 @@ func (s *Snapshot) FromPayload(payload []byte) error {
 
 func (a Snapshot) Equals(b Snapshot) bool {
 	return a.Tree.Equals(b.Tree) &&
-		a.Container == b.Container &&
+		a.Archive == b.Archive &&
 		a.Date.Equal(b.Date) &&
 		a.Comment == b.Comment
 }

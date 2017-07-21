@@ -103,13 +103,13 @@ func CreateSnapshot(
 	store storage.Storage,
 	tree_id objects.ObjectId,
 	date time.Time,
-	container string,
+	archive string,
 	comment string,
 ) (objects.ObjectId, error) {
 	return storage.SetObject(store, objects.ToRawObject(&objects.Snapshot{
-		Tree:      tree_id,
-		Date:      date,
-		Container: container,
-		Comment:   comment,
+		Tree:    tree_id,
+		Date:    date,
+		Archive: archive,
+		Comment: comment,
 	}))
 }

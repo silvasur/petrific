@@ -8,14 +8,14 @@ import (
 
 var (
 	testSnapshotObj = Snapshot{
-		Comment:   "foo\nbar\nbaz!",
-		Container: "foo",
-		Date:      time.Date(2017, 07, 01, 21, 40, 00, 0, time.FixedZone("", 2*60*60)),
-		Tree:      genId(0xff),
+		Archive: "foo",
+		Comment: "foo\nbar\nbaz!",
+		Date:    time.Date(2017, 07, 01, 21, 40, 00, 0, time.FixedZone("", 2*60*60)),
+		Tree:    genId(0xff),
 	}
 
 	testSnapshotSerialization = []byte("" +
-		"container foo\n" +
+		"archive foo\n" +
 		"date 2017-07-01T21:40:00+02:00\n" +
 		"tree sha3-256:ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff\n" +
 		"\n" +
@@ -46,10 +46,10 @@ func TestUnserializeSnapshot(t *testing.T) {
 func TestUnserializeSnapshotFailure(t *testing.T) {
 	subtests := []struct{ name, payload string }{
 		{"empty", ""},
-		{"missing tree", "container foo\ndate 2017-07-01T22:02:00+02:00\n"},
-		{"missing container", "date 2017-07-01T22:02:00+02:00\ntree sha3-256:0000000000000000000000000000000000000000000000000000000000000000\n"},
-		{"missing date", "container foo\ntree sha3-256:0000000000000000000000000000000000000000000000000000000000000000\n"},
-		{"invalid date", "container foo\ndate foobar\ntree sha3-256:0000000000000000000000000000000000000000000000000000000000000000\n"},
+		{"missing tree", "archive foo\ndate 2017-07-01T22:02:00+02:00\n"},
+		{"missing archive", "date 2017-07-01T22:02:00+02:00\ntree sha3-256:0000000000000000000000000000000000000000000000000000000000000000\n"},
+		{"missing date", "archive foo\ntree sha3-256:0000000000000000000000000000000000000000000000000000000000000000\n"},
+		{"invalid date", "archive foo\ndate foobar\ntree sha3-256:0000000000000000000000000000000000000000000000000000000000000000\n"},
 	}
 
 	for _, subtest := range subtests {
