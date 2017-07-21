@@ -11,17 +11,21 @@ var (
 		Archive: "foo",
 		Comment: "foo\nbar\nbaz!",
 		Date:    time.Date(2017, 07, 01, 21, 40, 00, 0, time.FixedZone("", 2*60*60)),
+		Signed:  true,
 		Tree:    genId(0xff),
 	}
 
 	testSnapshotSerialization = []byte("" +
+		"== BEGIN SNAPSHOT ==\n" +
 		"archive foo\n" +
 		"date 2017-07-01T21:40:00+02:00\n" +
+		"signed yes\n" +
 		"tree sha3-256:ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff\n" +
 		"\n" +
 		"foo\n" +
 		"bar\n" +
-		"baz!")
+		"baz!\n" +
+		"== END SNAPSHOT ==\n")
 )
 
 func TestSerializeSnapshot(t *testing.T) {
@@ -46,10 +50,11 @@ func TestUnserializeSnapshot(t *testing.T) {
 func TestUnserializeSnapshotFailure(t *testing.T) {
 	subtests := []struct{ name, payload string }{
 		{"empty", ""},
-		{"missing tree", "archive foo\ndate 2017-07-01T22:02:00+02:00\n"},
-		{"missing archive", "date 2017-07-01T22:02:00+02:00\ntree sha3-256:0000000000000000000000000000000000000000000000000000000000000000\n"},
-		{"missing date", "archive foo\ntree sha3-256:0000000000000000000000000000000000000000000000000000000000000000\n"},
-		{"invalid date", "archive foo\ndate foobar\ntree sha3-256:0000000000000000000000000000000000000000000000000000000000000000\n"},
+		{"missing tree", snapshot_start_line + "archive foo\ndate 2017-07-01T22:02:00+02:00\n" + snapshot_end_line},
+		{"missing archive", snapshot_start_line + "date 2017-07-01T22:02:00+02:00\ntree sha3-256:0000000000000000000000000000000000000000000000000000000000000000\n" + snapshot_end_line},
+		{"missing date", snapshot_start_line + "archive foo\ntree sha3-256:0000000000000000000000000000000000000000000000000000000000000000\n" + snapshot_end_line},
+		{"invalid date", snapshot_start_line + "archive foo\ndate foobar\ntree sha3-256:0000000000000000000000000000000000000000000000000000000000000000\n" + snapshot_end_line},
+		{"End marker missing", snapshot_start_line + "archive foo\ndate 2017-07-01T22:02:00+02:00\ntree sha3-256:0000000000000000000000000000000000000000000000000000000000000000\n"},
 	}
 
 	for _, subtest := range subtests {
