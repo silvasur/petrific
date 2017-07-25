@@ -62,6 +62,14 @@ func (s Snapshot) Payload() (out []byte) {
 	return out
 }
 
+type Signer interface {
+	Sign([]byte) ([]byte, error)
+}
+
+func (s Snapshot) SignedPayload(signer Signer) ([]byte, error) {
+	return signer.Sign(s.Payload())
+}
+
 func (s *Snapshot) FromPayload(payload []byte) error {
 	r := bytes.NewBuffer(payload)
 
