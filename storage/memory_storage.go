@@ -1,6 +1,7 @@
 package storage
 
 import (
+	"code.laria.me/petrific/config"
 	"code.laria.me/petrific/objects"
 )
 
@@ -14,6 +15,10 @@ func NewMemoryStorage() Storage {
 		objects: make(map[string][]byte),
 		bytype:  make(map[objects.ObjectType][]objects.ObjectId),
 	}
+}
+
+func MemoryStorageFromConfig(conf config.Config, name string) (Storage, error) {
+	return NewMemoryStorage(), nil
 }
 
 func (ms MemoryStorage) Get(id objects.ObjectId) ([]byte, error) {
@@ -38,4 +43,8 @@ func (ms MemoryStorage) Set(id objects.ObjectId, typ objects.ObjectType, raw []b
 
 func (ms MemoryStorage) List(typ objects.ObjectType) ([]objects.ObjectId, error) {
 	return ms.bytype[typ], nil
+}
+
+func (MemoryStorage) Close() error {
+	return nil
 }

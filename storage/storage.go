@@ -2,6 +2,7 @@ package storage
 
 import (
 	"bytes"
+	"code.laria.me/petrific/config"
 	"code.laria.me/petrific/objects"
 	"errors"
 	"fmt"
@@ -17,6 +18,14 @@ type Storage interface {
 	Has(id objects.ObjectId) (bool, error)
 	Set(id objects.ObjectId, typ objects.ObjectType, raw []byte) error
 	List(typ objects.ObjectType) ([]objects.ObjectId, error)
+
+	Close() error
+}
+
+type CreateStorageFromConfig func(conf config.Config, name string) (Storage, error)
+
+var StorageTypes = map[string]CreateStorageFromConfig{
+	"memory": MemoryStorageFromConfig,
 }
 
 func SetObject(s Storage, o objects.RawObject) (id objects.ObjectId, err error) {
