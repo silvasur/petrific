@@ -25,6 +25,7 @@ type Storage interface {
 type CreateStorageFromConfig func(conf config.Config, name string) (Storage, error)
 
 var StorageTypes = map[string]CreateStorageFromConfig{
+	"local":  LocalStorageFromConfig,
 	"memory": MemoryStorageFromConfig,
 }
 

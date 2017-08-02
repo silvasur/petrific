@@ -16,6 +16,13 @@ const (
 	OTSnapshot ObjectType = "snapshot"
 )
 
+var AllObjectTypes = []ObjectType{
+	OTBlob,
+	OTFile,
+	OTTree,
+	OTSnapshot,
+}
+
 type RawObject struct {
 	Type    ObjectType
 	Payload []byte
