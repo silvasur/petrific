@@ -11,11 +11,21 @@ import (
 type subcmd func(args []string) int
 
 var subcmds = map[string]subcmd{
-	"write-dir":       notImplementedYet,
+	"write-dir":       WriteDir,
 	"restore-dir":     notImplementedYet,
 	"take-snapshot":   notImplementedYet,
 	"create-snapshot": notImplementedYet,
 	"list-snapshots":  notImplementedYet,
+}
+
+func subcmdUsage(name string, usage string, flags *flag.FlagSet) func() {
+	return func() {
+		fmt.Fprintf(os.Stderr, "Usage: %s %s %s\n", os.Args[0], name, usage)
+		if flags != nil {
+			fmt.Fprintln(os.Stderr, "\nFlags:")
+			flags.PrintDefaults()
+		}
+	}
 }
 
 // Global flags

@@ -11,7 +11,7 @@ func pathJoin(parts ...string) string {
 	return strings.Join(parts, string(os.PathSeparator))
 }
 
-func openOSFile(path string) (osFile, error) {
+func OpenOSFile(path string) (osFile, error) {
 	fi, err := os.Lstat(path)
 	if err != nil {
 		return osFile{}, err
@@ -118,7 +118,7 @@ func (f osFile) CreateChildFile(name string, exec bool) (RegularFile, error) {
 	}
 	fh.Close()
 
-	return openOSFile(p)
+	return OpenOSFile(p)
 }
 
 func (f osFile) CreateChildDir(name string) (Dir, error) {
@@ -128,7 +128,7 @@ func (f osFile) CreateChildDir(name string) (Dir, error) {
 		return nil, err
 	}
 
-	return openOSFile(p)
+	return OpenOSFile(p)
 }
 
 func (f osFile) CreateChildSymlink(name string, target string) (Symlink, error) {
@@ -139,7 +139,7 @@ func (f osFile) CreateChildSymlink(name string, target string) (Symlink, error) 
 		return nil, err
 	}
 
-	return openOSFile(p)
+	return OpenOSFile(p)
 }
 
 func (f osFile) RenameChild(oldname, newname string) error {
