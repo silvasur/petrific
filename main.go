@@ -44,6 +44,7 @@ func Main() int {
 	if !loadConfig() {
 		return 1
 	}
+	defer objectstore.Close()
 
 	remaining := flag.Args()
 
