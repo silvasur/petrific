@@ -23,7 +23,8 @@ type File interface {
 
 type RegularFile interface {
 	File
-	Open() (io.ReadWriteCloser, error)
+	Open() (io.ReadCloser, error)
+	OpenWritable() (io.WriteCloser, error)
 }
 
 type Dir interface {

@@ -49,13 +49,13 @@ func mkfile(t *testing.T, d fs.Dir, name string, exec bool, content []byte) {
 		t.Fatalf("Could not create file %s: %s", name, err)
 	}
 
-	rwc, err := f.Open()
+	wc, err := f.OpenWritable()
 	if err != nil {
 		t.Fatalf("Could not create file %s: %s", name, err)
 	}
-	defer rwc.Close()
+	defer wc.Close()
 
-	if _, err := rwc.Write(content); err != nil {
+	if _, err := wc.Write(content); err != nil {
 		t.Fatalf("Could not create file %s: %s", name, err)
 	}
 }

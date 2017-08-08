@@ -40,7 +40,11 @@ type memfsFile struct {
 
 func (memfsFile) Type() FileType { return FFile }
 
-func (f memfsFile) Open() (io.ReadWriteCloser, error) {
+func (f memfsFile) Open() (io.ReadCloser, error) {
+	return f, nil
+}
+
+func (f memfsFile) OpenWritable() (io.WriteCloser, error) {
 	return f, nil
 }
 

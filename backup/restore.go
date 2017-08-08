@@ -7,6 +7,7 @@ import (
 	"code.laria.me/petrific/storage"
 	"fmt"
 	"io"
+	"math/rand"
 	"os"
 )
 
@@ -48,21 +49,22 @@ func RestoreDir(s storage.Storage, id objects.ObjectId, root fs.Dir) error {
 	for name, file_info := range tree {
 		switch file_info.Type() {
 		case objects.TETFile:
-			tmpname := fmt.Sprintf(".petrific-%d-%s", os.Getpid(), id)
+			tmpname := fmt.Sprintf(".petrific-%d-%08x%08x%08x%08x", os.Getpid(), rand.Uint32(), rand.Uint32(), rand.Uint32(), rand.Uint32())
 			new_file, err := root.CreateChildFile(tmpname, execBitFromACL(file_info.ACL()))
 			if err != nil {
 				return err
 			}
-			rwc, err := new_file.Open()
+
+			wc, err := new_file.OpenWritable()
 			if err != nil {
 				return err
 			}
 
-			if err := RestoreFile(s, file_info.(objects.TreeEntryFile).Ref, rwc); err != nil {
-				rwc.Close()
+			if err := RestoreFile(s, file_info.(objects.TreeEntryFile).Ref, wc); err != nil {
+				wc.Close()
 				return err
 			}
-			rwc.Close()
+			wc.Close()
 
 			if err := root.RenameChild(tmpname, name); err != nil {
 				return err

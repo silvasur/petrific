@@ -58,8 +58,16 @@ func (f osFile) Delete() error {
 	return os.RemoveAll(f.fullpath)
 }
 
-func (f osFile) Open() (io.ReadWriteCloser, error) {
+func (f osFile) Open() (io.ReadCloser, error) {
 	fh, err := os.Open(f.fullpath)
+	if err != nil {
+		return nil, err
+	}
+	return fh, nil
+}
+
+func (f osFile) OpenWritable() (io.WriteCloser, error) {
+	fh, err := os.Create(f.fullpath)
 	if err != nil {
 		return nil, err
 	}
