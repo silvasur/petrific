@@ -12,7 +12,7 @@ type subcmd func(args []string) int
 
 var subcmds = map[string]subcmd{
 	"write-dir":       WriteDir,
-	"restore-dir":     notImplementedYet,
+	"restore-dir":     RestoreDir,
 	"take-snapshot":   notImplementedYet,
 	"create-snapshot": notImplementedYet,
 	"list-snapshots":  notImplementedYet,
@@ -56,7 +56,12 @@ func Main() int {
 	}
 	defer objectstore.Close()
 
-	remaining := flag.Args()
+	remaining := make([]string, 0)
+	for _, arg := range flag.Args() {
+		if arg != "" {
+			remaining = append(remaining, arg)
+		}
+	}
 
 	var cmd subcmd
 	if len(remaining) > 0 {

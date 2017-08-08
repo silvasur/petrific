@@ -9,38 +9,45 @@ import (
 	"path"
 )
 
+func abspath(p string) (string, error) {
+	if p[0] != '/' {
+		pwd, err := os.Getwd()
+		if err != nil {
+			return "", fmt.Errorf("abspath(%s): %s", p, err)
+		}
+		p = pwd + "/" + p
+	}
+	return path.Clean(p), nil
+}
+
 func WriteDir(args []string) int {
-	if len(args) != 1 || len(args[0]) == 0 {
-		subcmdUsage("write-dir", "directory", nil)()
+	usage := subcmdUsage("write-dir", "directory", nil)
+
+	if len(args) != 1 {
+		usage()
 		return 2
 	}
 
-	dir_path := args[0]
-	// Make path absolute
-	if dir_path[0] != '/' {
-		pwd, err := os.Getwd()
-		if err != nil {
-			fmt.Fprintf(os.Stderr, "write-dir: %s", err)
-			return 1
-		}
-		dir_path = pwd + "/" + dir_path
+	dir_path, err := abspath(args[0])
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "write-dir: %s\n", err)
+		return 1
 	}
-	dir_path = path.Clean(dir_path)
 
 	d, err := fs.OpenOSFile(dir_path)
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "write-dir: %s", err)
+		fmt.Fprintf(os.Stderr, "write-dir: %s\n", err)
 		return 1
 	}
 
 	if d.Type() != fs.FDir {
-		fmt.Fprintf(os.Stderr, "write-dir: %s is not a directory", dir_path)
+		fmt.Fprintf(os.Stderr, "write-dir: %s is not a directory\n", dir_path)
 		return 1
 	}
 
 	id, err := backup.WriteDir(objectstore, dir_path, d, cache.NopCache{})
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "write-dir: %s", err)
+		fmt.Fprintf(os.Stderr, "write-dir: %s\n", err)
 		return 1
 	}
 
