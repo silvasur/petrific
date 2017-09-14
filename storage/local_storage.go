@@ -1,7 +1,6 @@
 package storage
 
 import (
-	"bufio"
 	"bytes"
 	"code.laria.me/petrific/config"
 	"code.laria.me/petrific/objects"
@@ -22,7 +21,7 @@ func objectDir(id objects.ObjectId) string {
 
 type LocalStorage struct {
 	Path  string
-	index map[objects.ObjectType]map[string]struct{}
+	index Index
 }
 
 func LocalStorageFromConfig(conf config.Config, name string) (Storage, error) {
@@ -36,10 +35,7 @@ func LocalStorageFromConfig(conf config.Config, name string) (Storage, error) {
 
 func OpenLocalStorage(path string) (l LocalStorage, err error) {
 	l.Path = path
-	l.index = make(map[objects.ObjectType]map[string]struct{})
-	for _, t := range objects.AllObjectTypes {
-		l.index[t] = make(map[string]struct{})
-	}
+	l.index = NewIndex()
 
 	if fi, err := os.Stat(path); os.IsNotExist(err) {
 		if err := os.MkdirAll(path, 0755); err != nil {
@@ -61,22 +57,7 @@ func OpenLocalStorage(path string) (l LocalStorage, err error) {
 
 	if err == nil {
 		defer f.Close()
-
-		scan := bufio.NewScanner(f)
-		for scan.Scan() {
-			line := scan.Text()
-
-			parts := strings.SplitN(strings.TrimSpace(line), " ", 2)
-			if len(parts) == 2 {
-				id, err := objects.ParseObjectId(parts[1])
-				if err != nil {
-					return l, err
-				}
-
-				l.index[objects.ObjectType(parts[0])][id.String()] = struct{}{}
-			}
-		}
-		err = scan.Err()
+		err = l.index.Load(f)
 	}
 
 	return
@@ -130,31 +111,20 @@ func (l LocalStorage) Set(id objects.ObjectId, typ objects.ObjectType, raw []byt
 	defer f.Close()
 
 	_, err = f.Write(raw)
-	l.index[typ][id.String()] = struct{}{}
+	l.index.Set(id, typ)
 	return err
 }
 
 func (l LocalStorage) List(typ objects.ObjectType) ([]objects.ObjectId, error) {
-	ids := make([]objects.ObjectId, 0, len(l.index[typ]))
-	for id := range l.index[typ] {
-		ids = append(ids, objects.MustParseObjectId(id))
-	}
-	return ids, nil
+	return l.index.List(typ), nil
 }
 
-func (l LocalStorage) Close() (outerr error) {
+func (l LocalStorage) Close() error {
 	f, err := os.Create(joinPath(l.Path, "index"))
 	if err != nil {
 		return err
 	}
 	defer f.Close()
 
-	for t, objs := range l.index {
-		for id := range objs {
-			if _, err := fmt.Fprintf(f, "%s %s\n", t, id); err != nil {
-				return err
-			}
-		}
-	}
-	return nil
+	return l.index.Save(f)
 }
