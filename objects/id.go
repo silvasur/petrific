@@ -39,7 +39,7 @@ type ObjectId struct {
 	Sum  []byte
 }
 
-func (oid ObjectId) wellformed() bool {
+func (oid ObjectId) Wellformed() bool {
 	return oid.Algo.checkAlgo() && len(oid.Sum) == oid.Algo.sumLength()
 }
 
@@ -61,10 +61,16 @@ func ParseObjectId(s string) (oid ObjectId, err error) {
 		return
 	}
 
-	if !oid.wellformed() {
+	if !oid.Wellformed() {
 		err = errors.New("Object ID is malformed")
 	}
 
+	return
+}
+
+// Set implements flag.Value for ObjectId
+func (oid *ObjectId) Set(s string) (err error) {
+	*oid, err = ParseObjectId(s)
 	return
 }
 

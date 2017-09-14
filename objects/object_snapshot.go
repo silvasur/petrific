@@ -23,6 +23,7 @@ type Snapshot struct {
 	Archive string
 	Comment string
 	Signed  bool
+	raw     []byte
 }
 
 func (s Snapshot) Type() ObjectType {
@@ -62,6 +63,20 @@ func (s Snapshot) Payload() (out []byte) {
 	return out
 }
 
+type Verifyer interface {
+	Verify([]byte) error
+}
+
+// Verify verifies that the snapshot has a valid signature.
+// Only works with unserialized snapshots, i.e. a freshly created snapshot can not be verified.
+func (s Snapshot) Verify(v Verifyer) error {
+	if !s.Signed {
+		return nil
+	}
+
+	return v.Verify(s.raw)
+}
+
 type Signer interface {
 	Sign([]byte) ([]byte, error)
 }
@@ -72,6 +87,8 @@ func (s Snapshot) SignedPayload(signer Signer) ([]byte, error) {
 
 func (s *Snapshot) FromPayload(payload []byte) error {
 	r := bytes.NewBuffer(payload)
+
+	s.raw = payload
 
 	seenArchive := false
 	seenDate := false

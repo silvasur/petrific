@@ -22,6 +22,7 @@ func abspath(p string) (string, error) {
 
 func WriteDir(args []string) int {
 	usage := subcmdUsage("write-dir", "directory", nil)
+	errout := subcmdErrout("write-dir")
 
 	if len(args) != 1 {
 		usage()
@@ -30,24 +31,24 @@ func WriteDir(args []string) int {
 
 	dir_path, err := abspath(args[0])
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "write-dir: %s\n", err)
+		errout(err)
 		return 1
 	}
 
 	d, err := fs.OpenOSFile(dir_path)
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "write-dir: %s\n", err)
+		errout(err)
 		return 1
 	}
 
 	if d.Type() != fs.FDir {
-		fmt.Fprintf(os.Stderr, "write-dir: %s is not a directory\n", dir_path)
+		errout(fmt.Errorf("%s is not a directory\n", dir_path))
 		return 1
 	}
 
 	id, err := backup.WriteDir(objectstore, dir_path, d, cache.NopCache{})
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "write-dir: %s\n", err)
+		errout(err)
 		return 1
 	}
 

@@ -1,6 +1,7 @@
 package config
 
 import (
+	"code.laria.me/petrific/gpg"
 	"fmt"
 	"github.com/BurntSushi/toml"
 	"github.com/adrg/xdg"
@@ -30,6 +31,10 @@ func LoadConfig(path string) (config Config, err error) {
 
 	_, err = toml.DecodeFile(path, &config)
 	return
+}
+
+func (c Config) GPGSigner() gpg.Signer {
+	return gpg.Signer{c.Signing.Key}
 }
 
 // Get gets a value from the StorageConfig, taking care about type checking.

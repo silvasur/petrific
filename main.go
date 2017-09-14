@@ -11,11 +11,12 @@ import (
 type subcmd func(args []string) int
 
 var subcmds = map[string]subcmd{
-	"write-dir":       WriteDir,
-	"restore-dir":     RestoreDir,
-	"take-snapshot":   notImplementedYet,
-	"create-snapshot": notImplementedYet,
-	"list-snapshots":  notImplementedYet,
+	"write-dir":        WriteDir,
+	"restore-dir":      RestoreDir,
+	"take-snapshot":    TakeSnapshot,
+	"create-snapshot":  CreateSnapshot,
+	"list-snapshots":   ListSnapshots,
+	"restore-snapshot": RestoreSnapshot,
 }
 
 func subcmdUsage(name string, usage string, flags *flag.FlagSet) func() {
@@ -25,6 +26,12 @@ func subcmdUsage(name string, usage string, flags *flag.FlagSet) func() {
 			fmt.Fprintln(os.Stderr, "\nFlags:")
 			flags.PrintDefaults()
 		}
+	}
+}
+
+func subcmdErrout(name string) func(error) {
+	return func(err error) {
+		fmt.Fprintf(os.Stderr, "%s: %s\n", name, err)
 	}
 }
 
@@ -115,9 +122,4 @@ func loadConfig() bool {
 
 	objectstore = s
 	return true
-}
-
-func notImplementedYet(_ []string) int {
-	fmt.Fprintln(os.Stderr, "Not implemented yet")
-	return 1
 }

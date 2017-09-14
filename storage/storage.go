@@ -7,6 +7,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"time"
 )
 
 var (
@@ -88,4 +89,40 @@ func GetObjectOfType(s Storage, id objects.ObjectId, t objects.ObjectType) (obje
 	}
 
 	return rawobj.Object()
+}
+
+// FindLatestSnapshot finds the latest snapshot, optionally filtered by archive
+func FindLatestSnapshot(store Storage, archive string) (latestSnapshot *objects.Snapshot, err error) {
+	ids, err := store.List(objects.OTSnapshot)
+	if err != nil {
+		return nil, err
+	}
+
+	var earliestTime time.Time
+	found := false
+
+	for _, id := range ids {
+		_snapshot, err := GetObjectOfType(store, id, objects.OTSnapshot)
+		if err != nil {
+			return nil, err
+		}
+
+		snapshot := _snapshot.(*objects.Snapshot)
+
+		if archive != "" && snapshot.Archive != archive {
+			continue
+		}
+
+		if snapshot.Date.After(earliestTime) {
+			earliestTime = snapshot.Date
+			latestSnapshot = snapshot
+			found = true
+		}
+	}
+
+	if !found {
+		return latestSnapshot, ObjectNotFound
+	}
+
+	return latestSnapshot, nil
 }
