@@ -69,3 +69,11 @@ func (idx Index) Load(r io.Reader) error {
 	}
 	return scan.Err()
 }
+
+func (a Index) Combine(b Index) {
+	for t, objs := range b {
+		for id := range objs {
+			a[t][id] = struct{}{}
+		}
+	}
+}

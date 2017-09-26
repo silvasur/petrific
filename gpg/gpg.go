@@ -12,16 +12,19 @@ type Signer struct {
 	Key string
 }
 
-// Sign signs a message b with the key s.Key
-func (s Signer) Sign(b []byte) ([]byte, error) {
-	cmd := exec.Command("gpg", "--clearsign", "-u", s.Key)
-
+func filter(cmd *exec.Cmd, b []byte) ([]byte, error) {
 	cmd.Stdin = bytes.NewReader(b)
 	var out bytes.Buffer
 	cmd.Stdout = &out
 
 	err := cmd.Run()
 	return out.Bytes(), err
+}
+
+// Sign signs a message b with the key s.Key
+func (s Signer) Sign(b []byte) ([]byte, error) {
+	cmd := exec.Command("gpg", "--clearsign", "-u", s.Key)
+	return filter(cmd, b)
 }
 
 // Verifyer implements objects.Verifyer using gpg
@@ -32,4 +35,25 @@ func (Verifyer) Verify(b []byte) error {
 	cmd := exec.Command("gpg", "--verify")
 	cmd.Stdin = bytes.NewReader(b)
 	return cmd.Run()
+}
+
+type Encrypter struct {
+	Key string
+}
+
+func (e Encrypter) Encrypt(b []byte) ([]byte, error) {
+	cmd := exec.Command("gpg", "--encrypt", "--recipient", e.Key)
+	return filter(cmd, b)
+}
+
+type Decrypter struct{}
+
+func (Decrypter) Decrypt(b []byte) ([]byte, error) {
+	cmd := exec.Command("gpg", "--decrypt")
+	return filter(cmd, b)
+}
+
+type Crypter struct {
+	Encrypter
+	Decrypter
 }

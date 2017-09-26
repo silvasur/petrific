@@ -3,6 +3,7 @@ package main
 import (
 	"code.laria.me/petrific/config"
 	"code.laria.me/petrific/storage"
+	"code.laria.me/petrific/storage/registry"
 	"flag"
 	"fmt"
 	"os"
@@ -108,7 +109,7 @@ func loadConfig() bool {
 		return false
 	}
 
-	st, ok := storage.StorageTypes[method]
+	st, ok := registry.StorageTypes[method]
 	if !ok {
 		fmt.Fprintf(os.Stderr, "Failed setting up storage %s: Method %s unknown", storageName, method)
 		return false
