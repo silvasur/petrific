@@ -82,7 +82,7 @@ func RestoreDir(s storage.Storage, id objects.ObjectId, root fs.Dir) error {
 						return err
 					}
 				}
-			} else if err != os.ErrNotExist {
+			} else if !os.IsNotExist(err) {
 				return err
 			}
 
