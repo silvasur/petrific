@@ -97,27 +97,9 @@ func loadConfig() bool {
 		storageName = conf.DefaultStorage
 	}
 
-	storageOptions, ok := conf.Storage[storageName]
-	if !ok {
-		fmt.Fprintf(os.Stderr, "Storage %s not found\n", storageName)
-		return false
-	}
-
-	var method string
-	if err := storageOptions.Get("method", &method); err != nil {
-		fmt.Fprintf(os.Stderr, "Failed setting up storage %s: %s\n", storageName, err)
-		return false
-	}
-
-	st, ok := registry.StorageTypes[method]
-	if !ok {
-		fmt.Fprintf(os.Stderr, "Failed setting up storage %s: Method %s unknown", storageName, method)
-		return false
-	}
-
-	s, err := st(conf, storageName)
+	s, err := registry.LoadStorage(conf, storageName)
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "Failed setting up storage %s: %s\n", storageName, err)
+		fmt.Fprintln(os.Stderr, err)
 		return false
 	}
 

@@ -6,6 +6,7 @@ import (
 	"code.laria.me/petrific/fs"
 	"code.laria.me/petrific/objects"
 	"code.laria.me/petrific/storage"
+	"code.laria.me/petrific/storage/memory"
 	"testing"
 )
 
@@ -27,7 +28,7 @@ func wantObject(
 }
 
 func TestWriteLargeFile(t *testing.T) {
-	s := storage.NewMemoryStorage()
+	s := memory.NewMemoryStorage()
 
 	id, err := WriteFile(s, bytes.NewReader(content_largefile))
 	if err != nil {
@@ -61,7 +62,7 @@ func mkfile(t *testing.T, d fs.Dir, name string, exec bool, content []byte) {
 }
 
 func TestWriteDir(t *testing.T) {
-	s := storage.NewMemoryStorage()
+	s := memory.NewMemoryStorage()
 
 	root := fs.NewMemoryFSRoot("root")
 

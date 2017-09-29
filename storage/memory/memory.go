@@ -1,8 +1,9 @@
-package storage
+package memory
 
 import (
 	"code.laria.me/petrific/config"
 	"code.laria.me/petrific/objects"
+	"code.laria.me/petrific/storage"
 )
 
 type MemoryStorage struct {
@@ -10,21 +11,21 @@ type MemoryStorage struct {
 	bytype  map[objects.ObjectType][]objects.ObjectId
 }
 
-func NewMemoryStorage() Storage {
+func NewMemoryStorage() storage.Storage {
 	return MemoryStorage{
 		objects: make(map[string][]byte),
 		bytype:  make(map[objects.ObjectType][]objects.ObjectId),
 	}
 }
 
-func MemoryStorageFromConfig(conf config.Config, name string) (Storage, error) {
+func MemoryStorageFromConfig(conf config.Config, name string) (storage.Storage, error) {
 	return NewMemoryStorage(), nil
 }
 
 func (ms MemoryStorage) Get(id objects.ObjectId) ([]byte, error) {
 	b, ok := ms.objects[id.String()]
 	if !ok {
-		return nil, ObjectNotFound
+		return nil, storage.ObjectNotFound
 	}
 	return b, nil
 }

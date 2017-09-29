@@ -1,9 +1,10 @@
-package storage
+package local
 
 import (
 	"bytes"
 	"code.laria.me/petrific/config"
 	"code.laria.me/petrific/objects"
+	"code.laria.me/petrific/storage"
 	"encoding/hex"
 	"fmt"
 	"io"
@@ -21,10 +22,10 @@ func objectDir(id objects.ObjectId) string {
 
 type LocalStorage struct {
 	Path  string
-	index Index
+	index storage.Index
 }
 
-func LocalStorageFromConfig(conf config.Config, name string) (Storage, error) {
+func LocalStorageFromConfig(conf config.Config, name string) (storage.Storage, error) {
 	var path string
 	if err := conf.Storage[name].Get("path", &path); err != nil {
 		return nil, err
@@ -35,7 +36,7 @@ func LocalStorageFromConfig(conf config.Config, name string) (Storage, error) {
 
 func OpenLocalStorage(path string) (l LocalStorage, err error) {
 	l.Path = path
-	l.index = NewIndex()
+	l.index = storage.NewIndex()
 
 	if fi, err := os.Stat(path); os.IsNotExist(err) {
 		if err := os.MkdirAll(path, 0755); err != nil {
@@ -70,7 +71,7 @@ func objectPath(id objects.ObjectId) string {
 func (l LocalStorage) Get(id objects.ObjectId) ([]byte, error) {
 	f, err := os.Open(joinPath(l.Path, objectPath(id)))
 	if os.IsNotExist(err) {
-		return []byte{}, ObjectNotFound
+		return []byte{}, storage.ObjectNotFound
 	} else if err != nil {
 		return []byte{}, err
 	}

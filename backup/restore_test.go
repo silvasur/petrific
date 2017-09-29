@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"code.laria.me/petrific/fs"
 	"code.laria.me/petrific/objects"
-	"code.laria.me/petrific/storage"
+	"code.laria.me/petrific/storage/memory"
 	"io"
 	"testing"
 )
@@ -71,7 +71,7 @@ func wantDir(n int, fx func(*testing.T, fs.Dir)) func(*testing.T, fs.File) {
 }
 
 func TestRestoreDir(t *testing.T) {
-	s := storage.NewMemoryStorage()
+	s := memory.NewMemoryStorage()
 
 	s.Set(objid_emptyfile, objects.OTFile, obj_emptyfile)
 	s.Set(objid_fooblob, objects.OTBlob, obj_fooblob)
@@ -109,7 +109,7 @@ func TestRestoreDir(t *testing.T) {
 }
 
 func TestRestoreLargeFile(t *testing.T) {
-	s := storage.NewMemoryStorage()
+	s := memory.NewMemoryStorage()
 	s.Set(objid_largefile_blob0, objects.OTBlob, obj_largefile_blob0)
 	s.Set(objid_largefile_blob1, objects.OTBlob, obj_largefile_blob1)
 	s.Set(objid_largefile, objects.OTFile, obj_largefile)
