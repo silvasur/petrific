@@ -158,16 +158,20 @@ func cloudStorageCreator(cloudCreator cloudObjectStorageCreator) storage.CreateS
 	return func(conf config.Config, name string) (storage.Storage, error) {
 		var cbos CloudBasedObjectStorage
 
-		storageconf := conf.Storage[name]
+		var storageconf struct {
+			Prefix     string `toml:"prefix,omitempty"`
+			EncryptFor string `toml:"encrypt_for,omitempty"`
+		}
 
-		storageconf.Get("prefix", &cbos.Prefix)
+		if err := conf.GetStorageConfData(name, &storageconf); err != nil {
+			return nil, err
+		}
 
-		encrypt_for := ""
-		storageconf.Get("encrypt_for", &encrypt_for)
+		cbos.Prefix = storageconf.Prefix
 
-		if encrypt_for != "" {
+		if storageconf.EncryptFor != "" {
 			cbos.Crypter = gpg.Crypter{
-				gpg.Encrypter{Key: encrypt_for},
+				gpg.Encrypter{Key: storageconf.EncryptFor},
 				gpg.Decrypter{},
 			}
 		}

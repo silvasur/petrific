@@ -26,12 +26,13 @@ type LocalStorage struct {
 }
 
 func LocalStorageFromConfig(conf config.Config, name string) (storage.Storage, error) {
-	var path string
-	if err := conf.Storage[name].Get("path", &path); err != nil {
+	var path_wrap struct{ Path string }
+
+	if err := conf.GetStorageConfData(name, &path_wrap); err != nil {
 		return nil, err
 	}
 
-	return OpenLocalStorage(config.ExpandTilde(path))
+	return OpenLocalStorage(config.ExpandTilde(path_wrap.Path))
 }
 
 func OpenLocalStorage(path string) (l LocalStorage, err error) {

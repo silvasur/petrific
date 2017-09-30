@@ -2,23 +2,35 @@ package config
 
 import (
 	"code.laria.me/petrific/gpg"
+	"errors"
 	"fmt"
 	"github.com/BurntSushi/toml"
 	"github.com/adrg/xdg"
 	"os"
 	"os/user"
-	"reflect"
 	"strings"
 )
 
-type StorageConfig map[string]interface{}
+type StorageConfigErr struct {
+	Name string
+	Err  error
+}
+
+func (sce StorageConfigErr) Error() string {
+	return fmt.Sprintf("Could not get configuration for storage %s: %s", sce.Name, sce.Err.Error())
+}
+
+var (
+	StorageConfigNotFound = errors.New("Not found")
+)
 
 type Config struct {
 	DefaultStorage string `toml:"default_storage"`
 	Signing        struct {
 		Key string
 	}
-	Storage map[string]StorageConfig
+	Storage map[string]toml.Primitive
+	meta    toml.MetaData `toml:"-"`
 }
 
 func LoadConfig(path string) (config Config, err error) {
@@ -29,42 +41,37 @@ func LoadConfig(path string) (config Config, err error) {
 		}
 	}
 
-	_, err = toml.DecodeFile(path, &config)
-	return
+	meta, err := toml.DecodeFile(path, &config)
+	config.meta = meta
+	return config, err
 }
 
 func (c Config) GPGSigner() gpg.Signer {
 	return gpg.Signer{c.Signing.Key}
 }
 
-// Get gets a value from the StorageConfig, taking care about type checking.
-// ptr must be a pointer or this method will panic.
-// ptr will only be changed, if returned error != nil
-func (s StorageConfig) Get(k string, ptr interface{}) error {
-	ptrval := reflect.ValueOf(ptr)
-
-	if ptrval.Kind() != reflect.Ptr {
-		panic("ptr must be a pointer")
-	}
-
-	ptrelem := ptrval.Elem()
-	if !ptrelem.CanSet() {
-		panic("*ptr not settable?!")
-	}
-
-	v, ok := s[k]
+func (c Config) GetStorageMethod(name string) (string, error) {
+	prim, ok := c.Storage[name]
 	if !ok {
-		return fmt.Errorf("Key '%s' is missing", k)
+		return "", StorageConfigErr{name, StorageConfigNotFound}
 	}
 
-	vval := reflect.ValueOf(v)
-
-	if vval.Type() != ptrelem.Type() {
-		return fmt.Errorf("Expected config '%s' to be of type %s, got %s", k, ptrelem.Type(), vval.Type())
+	var method_wrap struct{ Method string }
+	err := c.meta.PrimitiveDecode(prim, &method_wrap)
+	if err != nil {
+		return "", StorageConfigErr{name, err}
 	}
 
-	ptrelem.Set(vval)
-	return nil
+	return method_wrap.Method, nil
+}
+
+func (c Config) GetStorageConfData(name string, v interface{}) error {
+	prim, ok := c.Storage[name]
+	if !ok {
+		return StorageConfigErr{name, StorageConfigNotFound}
+	}
+
+	return c.meta.PrimitiveDecode(prim, v)
 }
 
 func ExpandTilde(path string) string {

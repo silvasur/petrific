@@ -3,7 +3,6 @@ package cloud
 import (
 	"code.laria.me/petrific/config"
 	"code.laria.me/petrific/storage"
-	"fmt"
 	"github.com/ncw/swift"
 	"time"
 )
@@ -13,61 +12,67 @@ type SwiftCloudStorage struct {
 	container string
 }
 
-type SwiftStorageConfigMandatoryError struct {
-	Key string
-	Err error
-}
+type SwiftConfig struct {
+	// Mandatory options
+	Container string `toml:"container"`
+	UserName  string `toml:"user_name"`
+	ApiKey    string `toml:"api_key"`
+	AuthURL   string `toml:"auth_url"`
 
-func (e SwiftStorageConfigMandatoryError) Error() string {
-	return fmt.Sprintf("Could not get mandatory key %s for swift storage: %s", e.Key, e.Err.Error())
+	// Optional... options
+	Domain         string `toml:"domain,omitempty"`
+	DomainID       string `toml:"domain_id,omitempty"`
+	UserID         string `toml:"user_id,omitempty"`
+	Retries        int    `toml:"retries,omitempty"`
+	Region         string `toml:"region,omitempty"`
+	AuthVersion    int    `toml:"auth_version,omitempty"`
+	Tenant         string `toml:"tenant,omitempty"`
+	TenantID       string `toml:"tenant_id,omitempty"`
+	TenantDomain   string `toml:"tenant_domain,omitempty"`
+	TenantDomainID string `toml:"tenant_domain_id,omitempty"`
+	TrustID        string `toml:"trust_id,omitempty"`
+	ConnectTimeout string `toml:"connect_timeout,omitempty"`
+	Timeout        string `toml:"timeout,omitempty"`
 }
 
 func SwiftStorageCreator() storage.CreateStorageFromConfig {
 	return cloudStorageCreator(func(conf config.Config, name string) (CloudStorage, error) {
-		storage_conf := conf.Storage[name]
+		var storage_conf SwiftConfig
+
+		if err := conf.GetStorageConfData(name, &storage_conf); err != nil {
+			return nil, err
+		}
+
 		storage := SwiftCloudStorage{}
 		storage.con = new(swift.Connection)
 
-		// Mandatory options
-		if err := storage_conf.Get("container", &storage.container); err != nil {
-			return nil, SwiftStorageConfigMandatoryError{"container", err}
-		}
-		if err := storage_conf.Get("user_name", &storage.con.UserName); err != nil {
-			return nil, SwiftStorageConfigMandatoryError{"user_name", err}
-		}
-		if err := storage_conf.Get("api_key", &storage.con.ApiKey); err != nil {
-			return nil, SwiftStorageConfigMandatoryError{"api_key", err}
-		}
-		if err := storage_conf.Get("auth_url", &storage.con.AuthUrl); err != nil {
-			return nil, SwiftStorageConfigMandatoryError{"auth_url", err}
-		}
+		storage.container = storage_conf.Container
+		storage.con.UserName = storage_conf.UserName
+		storage.con.ApiKey = storage_conf.ApiKey
+		storage.con.AuthUrl = storage_conf.AuthURL
 
-		// Optional... options
+		storage.con.Domain = storage_conf.Domain
+		storage.con.DomainId = storage_conf.DomainID
+		storage.con.UserId = storage_conf.UserID
+		storage.con.Retries = storage_conf.Retries
+		storage.con.Region = storage_conf.Region
+		storage.con.AuthVersion = storage_conf.AuthVersion
+		storage.con.Tenant = storage_conf.Tenant
+		storage.con.TenantId = storage_conf.TenantID
+		storage.con.TenantDomain = storage_conf.TenantDomain
+		storage.con.TenantDomainId = storage_conf.TenantDomainID
+		storage.con.TrustId = storage_conf.TrustID
 
-		storage_conf.Get("domain", &storage.con.Domain)
-		storage_conf.Get("domain_id", &storage.con.DomainId)
-		storage_conf.Get("user_id", &storage.con.UserId)
-		storage_conf.Get("retries", &storage.con.Retries)
-		storage_conf.Get("region", &storage.con.Region)
-		storage_conf.Get("auth_version", &storage.con.AuthVersion)
-		storage_conf.Get("tenant", &storage.con.Tenant)
-		storage_conf.Get("tenant_id", &storage.con.TenantId)
-		storage_conf.Get("tenant_domain", &storage.con.TenantDomain)
-		storage_conf.Get("tenant_domain_id", &storage.con.TenantDomainId)
-		storage_conf.Get("trust_id", &storage.con.TrustId)
-
-		var connect_timeout_str string
-		if storage_conf.Get("connect_timeout", &connect_timeout_str) == nil {
-			d, err := time.ParseDuration(connect_timeout_str)
+		if storage_conf.ConnectTimeout != "" {
+			d, err := time.ParseDuration(storage_conf.ConnectTimeout)
 			if err != nil {
 				return nil, err
 			}
 			storage.con.ConnectTimeout = d
 		}
 
-		var timeout_str string
-		if storage_conf.Get("timeout", &timeout_str) == nil {
-			d, err := time.ParseDuration(timeout_str)
+		if storage_conf.Timeout != "" {
+			d, err := time.ParseDuration(storage_conf.Timeout)
 			if err != nil {
 				return nil, err
 			}

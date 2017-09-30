@@ -35,13 +35,9 @@ func (e storageConfErr) Error() string {
 }
 
 func loadStorage(conf config.Config, storageName string) (storage.Storage, error) {
-	storageOptions, ok := conf.Storage[storageName]
-	if !ok {
-		return nil, notFoundErr
-	}
+	method, err := conf.GetStorageMethod(storageName)
 
-	var method string
-	if err := storageOptions.Get("method", &method); err != nil {
+	if err != nil {
 		return nil, err
 	}
 
