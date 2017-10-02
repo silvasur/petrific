@@ -22,12 +22,18 @@ func MemoryStorageFromConfig(conf config.Config, name string) (storage.Storage, 
 	return NewMemoryStorage(), nil
 }
 
+func copyBytes(b []byte) []byte {
+	c := make([]byte, len(b))
+	copy(c, b)
+	return c
+}
+
 func (ms MemoryStorage) Get(id objects.ObjectId) ([]byte, error) {
 	b, ok := ms.objects[id.String()]
 	if !ok {
 		return nil, storage.ObjectNotFound
 	}
-	return b, nil
+	return copyBytes(b), nil
 }
 
 func (ms MemoryStorage) Has(id objects.ObjectId) (bool, error) {
@@ -36,7 +42,7 @@ func (ms MemoryStorage) Has(id objects.ObjectId) (bool, error) {
 }
 
 func (ms MemoryStorage) Set(id objects.ObjectId, typ objects.ObjectType, raw []byte) error {
-	ms.objects[id.String()] = raw
+	ms.objects[id.String()] = copyBytes(raw)
 	ms.bytype[typ] = append(ms.bytype[typ], id)
 
 	return nil

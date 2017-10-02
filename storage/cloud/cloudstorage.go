@@ -5,7 +5,6 @@ package cloud
 import (
 	"bytes"
 	"code.laria.me/petrific/config"
-	"code.laria.me/petrific/gpg"
 	"code.laria.me/petrific/objects"
 	"code.laria.me/petrific/storage"
 	"errors"
@@ -27,22 +26,9 @@ var (
 	NotFoundErr = errors.New("Object not found") // Cloud object could not be found
 )
 
-// Crypter provides de-/encrypting facilities for CloudBasedObjectStorage
-type Crypter interface {
-	Encrypt([]byte) ([]byte, error)
-	Decrypt([]byte) ([]byte, error)
-}
-
-// NopCrypter implements Crypter by not de/-encrypting at all
-type NopCrypter struct{}
-
-func (NopCrypter) Encrypt(in []byte) ([]byte, error) { return in, nil }
-func (NopCrypter) Decrypt(in []byte) ([]byte, error) { return in, nil }
-
 type CloudBasedObjectStorage struct {
-	CS      CloudStorage
-	Prefix  string
-	Crypter Crypter
+	CS     CloudStorage
+	Prefix string
 
 	index storage.Index
 }
@@ -94,24 +80,14 @@ func (cbos *CloudBasedObjectStorage) Init() error {
 }
 
 func (cbos CloudBasedObjectStorage) Get(id objects.ObjectId) ([]byte, error) {
-	b, err := cbos.CS.Get(cbos.objidToKey(id))
-	if err != nil {
-		return []byte{}, err
-	}
-
-	return cbos.Crypter.Decrypt(b)
+	return cbos.CS.Get(cbos.objidToKey(id))
 }
 
 func (cbos CloudBasedObjectStorage) Has(id objects.ObjectId) (bool, error) {
 	return cbos.CS.Has(cbos.objidToKey(id))
 }
 
-func (cbos CloudBasedObjectStorage) Set(id objects.ObjectId, typ objects.ObjectType, raw []byte) error {
-	b, err := cbos.Crypter.Encrypt(raw)
-	if err != nil {
-		return err
-	}
-
+func (cbos CloudBasedObjectStorage) Set(id objects.ObjectId, typ objects.ObjectType, b []byte) error {
 	if err := cbos.CS.Put(cbos.objidToKey(id), b); err != nil {
 		return err
 	}
@@ -159,8 +135,7 @@ func cloudStorageCreator(cloudCreator cloudObjectStorageCreator) storage.CreateS
 		var cbos CloudBasedObjectStorage
 
 		var storageconf struct {
-			Prefix     string `toml:"prefix,omitempty"`
-			EncryptFor string `toml:"encrypt_for,omitempty"`
+			Prefix string `toml:"prefix,omitempty"`
 		}
 
 		if err := conf.GetStorageConfData(name, &storageconf); err != nil {
@@ -168,13 +143,6 @@ func cloudStorageCreator(cloudCreator cloudObjectStorageCreator) storage.CreateS
 		}
 
 		cbos.Prefix = storageconf.Prefix
-
-		if storageconf.EncryptFor != "" {
-			cbos.Crypter = gpg.Crypter{
-				gpg.Encrypter{Key: storageconf.EncryptFor},
-				gpg.Decrypter{},
-			}
-		}
 
 		var err error
 		if cbos.CS, err = cloudCreator(conf, name); err != nil {

@@ -36,24 +36,3 @@ func (Verifyer) Verify(b []byte) error {
 	cmd.Stdin = bytes.NewReader(b)
 	return cmd.Run()
 }
-
-type Encrypter struct {
-	Key string
-}
-
-func (e Encrypter) Encrypt(b []byte) ([]byte, error) {
-	cmd := exec.Command("gpg", "--encrypt", "--recipient", e.Key)
-	return filter(cmd, b)
-}
-
-type Decrypter struct{}
-
-func (Decrypter) Decrypt(b []byte) ([]byte, error) {
-	cmd := exec.Command("gpg", "--decrypt")
-	return filter(cmd, b)
-}
-
-type Crypter struct {
-	Encrypter
-	Decrypter
-}

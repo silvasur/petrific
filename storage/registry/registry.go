@@ -11,10 +11,13 @@ import (
 )
 
 // List af all available storage types
-var StorageTypes = map[string]storage.CreateStorageFromConfig{
-	"local":           local.LocalStorageFromConfig,
-	"memory":          memory.MemoryStorageFromConfig,
-	"openstack-swift": cloud.SwiftStorageCreator(),
+func getStorageTypes() map[string]storage.CreateStorageFromConfig {
+	return map[string]storage.CreateStorageFromConfig{
+		"local":           local.LocalStorageFromConfig,
+		"memory":          memory.MemoryStorageFromConfig,
+		"filter":          filterStorageFromConfig,
+		"openstack-swift": cloud.SwiftStorageCreator(),
+	}
 }
 
 var notFoundErr = errors.New("Storage not found")
@@ -41,7 +44,7 @@ func loadStorage(conf config.Config, storageName string) (storage.Storage, error
 		return nil, err
 	}
 
-	st, ok := StorageTypes[method]
+	st, ok := getStorageTypes()[method]
 	if !ok {
 		return nil, unknownMethodErr(method)
 	}
