@@ -34,6 +34,21 @@ func (pf PipeFilter) Transform(b []byte) ([]byte, error) {
 	return buf.Bytes(), nil
 }
 
+// FilterSorage is a storage implementation wrapping around another storage, sending each raw object through an extrenal
+// binary for custom de/encoding (think encryption, compression, ...).
+//
+// It is used in a configuration by using the method "filter". It needs the config key "base" referencing the name of
+// another configured storage. Also needed are the string lists "decode" and "encode", describing which binary to call
+// with which parameters.
+//
+// For example, here is a configuration for a filter storage wrapping a storage "foo",
+// encrypting the content with gpg for the key "foobar"
+//
+//     [storage.foo_encrypted]
+//     method="filter"
+//     base="foo"
+//     encode=["gpg", "--encrypt", "--recipient", "foobar"]
+//     decode=["gpg", "--decrypt"]
 type FilterStorage struct {
 	Base           storage.Storage
 	Decode, Encode Filter

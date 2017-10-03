@@ -35,6 +35,8 @@ type SwiftConfig struct {
 	Timeout        string `toml:"timeout,omitempty"`
 }
 
+// SwiftStorageCreator creates an object storage that saves the objects to an openstack swift storage.
+// Use the method "openstack-swift" in your config and refer to the `SwiftConfig` structure for additional config keys.
 func SwiftStorageCreator() storage.CreateStorageFromConfig {
 	return cloudStorageCreator(func(conf config.Config, name string) (CloudStorage, error) {
 		var storage_conf SwiftConfig

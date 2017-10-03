@@ -6,6 +6,9 @@ import (
 	"code.laria.me/petrific/storage"
 )
 
+// Memory storage is an in-memory storage. It is rather useless when using petrific, it is mostly used for internal testing.
+// But if you want to use the memory storage anyway, you can do that by putting a storage section with the method
+// "memory" in your config file
 type MemoryStorage struct {
 	objects map[string][]byte
 	bytype  map[objects.ObjectType][]objects.ObjectId

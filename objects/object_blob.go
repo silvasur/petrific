@@ -1,5 +1,6 @@
 package objects
 
+// Blob is an object containing raw bytes. It's serialized payload is just that content.
 type Blob []byte
 
 func (b Blob) Type() ObjectType {

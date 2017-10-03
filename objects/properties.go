@@ -7,9 +7,10 @@ import (
 	"sort"
 )
 
-// properties are mappings from strings to strings that are encoded as a restricted version of URL query strings
-// (only the characters [a-zA-Z0-9.:_-] are allowed, values are ordered by their key)
-type properties map[string]string
+// Properties are mappings from strings to strings that are encoded as a restricted version of URL query strings
+// (only the characters [a-zA-Z0-9.:_-] are allowed, values are ordered by their key.
+// This ordering and this character restrictions guarantee reproducible serialization)
+type Properties map[string]string
 
 // escapePropertyString escapes all bytes not in [a-zA-Z0-9.,:_-] as %XX, where XX represents the hexadecimal value of the byte.
 // Compatible with URL query strings
@@ -29,7 +30,7 @@ func escapePropertyString(s string) []byte {
 	return out
 }
 
-func (p properties) MarshalText() ([]byte, error) { // Guaranteed to not fail, error is only here to satisfy encoding.TextMarshaler
+func (p Properties) MarshalText() ([]byte, error) { // Guaranteed to not fail, error is only here to satisfy encoding.TextMarshaler
 	keys := make([]string, len(p))
 	i := 0
 	for k := range p {
@@ -57,7 +58,7 @@ func (p properties) MarshalText() ([]byte, error) { // Guaranteed to not fail, e
 	return out, nil
 }
 
-func (p properties) UnmarshalText(text []byte) error {
+func (p Properties) UnmarshalText(text []byte) error {
 	vals, err := url.ParseQuery(string(text))
 	if err != nil {
 		return err
@@ -74,7 +75,7 @@ func (p properties) UnmarshalText(text []byte) error {
 	return nil
 }
 
-func (a properties) Equals(b properties) bool {
+func (a Properties) Equals(b Properties) bool {
 	for k, va := range a {
 		vb, ok := b[k]
 		if !ok || vb != va {

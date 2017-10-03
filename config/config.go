@@ -1,3 +1,33 @@
+// Package config provides methods for configuring the petrific binary.
+//
+// The configuration file is located in `$XDG_CONFIG_HOME/petrific/config.toml`,
+// where `$XDG_CONFIG_HOME` is typically `~/.config`.
+//
+// The configuration file is a TOML file, its main purpose is to define the used
+// storage backends, it also defines which GPG key to use for snapshot signing.
+//
+// Here is an example configuration file:
+//
+//    # This config key defines the default storage backend, as defined below ([storage.local_compressed])
+//    default_storage = "local_compressed"
+//
+//    [signing]
+//    # Use this GPG key to sign snapshots
+//    key = "0123456789ABCDEF0123456789ABCDEF01234567"
+//
+//    # The storage.* sections define storage backends.
+//    # Every section must contain the key `method`, the other keys depend on the selected method.
+//    # For more details see the documentation for ../storage
+//
+//    [storage.local]
+//    method="local"
+//    path="~/.local/share/petrific"
+//
+//    [storage.local_compressed]
+//    method="filter"
+//    base="local"
+//    encode=["zlib-flate", "-compress"]
+//    decode=["zlib-flate", "-uncompress"]
 package config
 
 import (

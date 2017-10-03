@@ -20,6 +20,13 @@ func objectDir(id objects.ObjectId) string {
 	return joinPath(string(id.Algo), hex.EncodeToString(id.Sum[0:1]))
 }
 
+// LocalStorage is a storage implementation that saves your objects on your local filesystem.
+//
+// Example config:
+//
+//     [storage.local_test]
+//     method="local"
+//     path="~/.local/share/petrific" # Save the objects here
 type LocalStorage struct {
 	Path  string
 	index storage.Index

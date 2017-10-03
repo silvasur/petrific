@@ -29,7 +29,7 @@ type TreeEntry interface {
 	User() string
 	Group() string
 	equalContent(TreeEntry) bool
-	toProperties() properties
+	toProperties() Properties
 }
 
 func compareTreeEntries(a, b TreeEntry) bool {
@@ -62,8 +62,8 @@ func (teb TreeEntryBase) Group() string {
 	return teb.group
 }
 
-func (teb TreeEntryBase) toProperties() properties {
-	props := properties{"acl": teb.acl.String()}
+func (teb TreeEntryBase) toProperties() Properties {
+	props := Properties{"acl": teb.acl.String()}
 	if teb.user != "" {
 		props["user"] = teb.user
 	}
@@ -93,7 +93,7 @@ func (tef TreeEntryFile) Type() TreeEntryType {
 	return TETFile
 }
 
-func (tef TreeEntryFile) toProperties() properties {
+func (tef TreeEntryFile) toProperties() Properties {
 	props := tef.TreeEntryBase.toProperties()
 	props["ref"] = tef.Ref.String()
 	return props
@@ -120,7 +120,7 @@ func (ted TreeEntryDir) Type() TreeEntryType {
 	return TETDir
 }
 
-func (ted TreeEntryDir) toProperties() properties {
+func (ted TreeEntryDir) toProperties() Properties {
 	props := ted.TreeEntryBase.toProperties()
 	props["ref"] = ted.Ref.String()
 	return props
@@ -147,7 +147,7 @@ func (tes TreeEntrySymlink) Type() TreeEntryType {
 	return TETSymlink
 }
 
-func (tes TreeEntrySymlink) toProperties() properties {
+func (tes TreeEntrySymlink) toProperties() Properties {
 	props := tes.TreeEntryBase.toProperties()
 	props["target"] = tes.Target
 	return props
@@ -158,6 +158,24 @@ func (a TreeEntrySymlink) equalContent(_b TreeEntry) bool {
 	return ok && a.TreeEntryBase.equalContent(b.TreeEntryBase) && a.Target == b.Target
 }
 
+// Tree objects represent a filesystem tree / directory.
+// It contains references to files (See `File`), symlinks and other trees plus their metadata.
+// It is serialized as a sorted list of `Property` serializations (seperated by newline '\n').
+// All entries have the property keys "name" and "type" (and optionally "user", "group" and "acl" representing a posix ACL.
+// Currently only the execution bit is actually considerer. Choosing posix ACLs gives us the
+// possibility to extend the privilege system later).
+// Further keys depend on the value of type:
+//
+// type=file, type=dir =>
+//
+// ref: Holding the ID referencing a file / subtree
+//
+// type=symlink
+//
+// target: Holding the (relative) symlink path
+//
+// The Property format allows easy extension in the future while remaining compatible
+// to older versions (they then simply ignore the additional properties).
 type Tree map[string]TreeEntry
 
 func (t Tree) Type() ObjectType {
@@ -188,7 +206,7 @@ func (t Tree) Payload() (out []byte) {
 	return
 }
 
-func getObjectIdFromProps(p properties, key string) (ObjectId, error) {
+func getObjectIdFromProps(p Properties, key string) (ObjectId, error) {
 	raw, ok := p[key]
 	if !ok {
 		return ObjectId{}, fmt.Errorf("Missing key: %s", key)
@@ -198,7 +216,7 @@ func getObjectIdFromProps(p properties, key string) (ObjectId, error) {
 	return oid, err
 }
 
-func defaultFileTreeEntryBase(_acl *acl.ACL, props properties) (base TreeEntryBase) {
+func defaultFileTreeEntryBase(_acl *acl.ACL, props Properties) (base TreeEntryBase) {
 	base.user = props["user"]
 	base.group = props["group"]
 	if _acl == nil {
@@ -209,7 +227,7 @@ func defaultFileTreeEntryBase(_acl *acl.ACL, props properties) (base TreeEntryBa
 	return
 }
 
-func defaultDirTreeEntryBase(_acl *acl.ACL, props properties) (base TreeEntryBase) {
+func defaultDirTreeEntryBase(_acl *acl.ACL, props Properties) (base TreeEntryBase) {
 	base.user = props["user"]
 	base.group = props["group"]
 	if _acl == nil {
@@ -229,7 +247,7 @@ func (t Tree) FromPayload(payload []byte) error {
 			continue
 		}
 
-		props := make(properties)
+		props := make(Properties)
 		if err := props.UnmarshalText(line); err != nil {
 			return err
 		}

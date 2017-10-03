@@ -17,6 +17,11 @@ const (
 	snapshot_end_line   = snapshot_end_marker + "\n"
 )
 
+// Snapshot objects describe the state of a directory structure at a given time. It references a tree object by it's ID,
+// records the snapshot time and associates it ton an archive (which is just a short freeform text grouping multiple snapshots together).
+// A snapshot can optionally contain a comment and can be signed with a gpg key.
+// If the snapshot is signed and you trust the signature, you can automatically trust the whole associated file tree,
+// since all references are really cryptographic hashes, guaranteeing data integrity.
 type Snapshot struct {
 	Tree    ObjectId
 	Date    time.Time

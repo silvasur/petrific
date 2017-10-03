@@ -23,6 +23,9 @@ var AllObjectTypes = []ObjectType{
 	OTSnapshot,
 }
 
+// RawObject describes a serialized object plus it's type header. This is the content that will be saved.
+// It is serialized as the type (ObjectType), a space byte, the size of the payload in bytes (encoded as decimal ASCII number), a newline ('\n') character and the payload.
+// The encoding of the payload depends on the type.
 type RawObject struct {
 	Type    ObjectType
 	Payload []byte

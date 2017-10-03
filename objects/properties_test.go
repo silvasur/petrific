@@ -22,13 +22,13 @@ func TestPropEscape(t *testing.T) {
 func TestPropertyMarshalling(t *testing.T) {
 	tests := []struct {
 		name string
-		in   properties
+		in   Properties
 		want string
 	}{
-		{"empty", properties{}, ""},
-		{"single", properties{"foo": "bar"}, "foo=bar"},
-		{"simple", properties{"foo": "bar", "bar": "baz"}, "bar=baz&foo=bar"},
-		{"escapes", properties{"foo&bar": "%=baz", "?": "!"}, "%3f=%21&foo%26bar=%25%3dbaz"},
+		{"empty", Properties{}, ""},
+		{"single", Properties{"foo": "bar"}, "foo=bar"},
+		{"simple", Properties{"foo": "bar", "bar": "baz"}, "bar=baz&foo=bar"},
+		{"escapes", Properties{"foo&bar": "%=baz", "?": "!"}, "%3f=%21&foo%26bar=%25%3dbaz"},
 	}
 
 	for _, subtest := range tests {
@@ -48,16 +48,16 @@ func TestPropertyUnmarshalling(t *testing.T) {
 	tests := []struct {
 		name string
 		in   string
-		want properties
+		want Properties
 	}{
-		{"empty", "", properties{}},
-		{"single", "foo=bar", properties{"foo": "bar"}},
-		{"simple", "bar=baz&foo=bar", properties{"foo": "bar", "bar": "baz"}},
-		{"escapes", "%3f=%21&foo%26bar=%25%3dbaz", properties{"foo&bar": "%=baz", "?": "!"}},
+		{"empty", "", Properties{}},
+		{"single", "foo=bar", Properties{"foo": "bar"}},
+		{"simple", "bar=baz&foo=bar", Properties{"foo": "bar", "bar": "baz"}},
+		{"escapes", "%3f=%21&foo%26bar=%25%3dbaz", Properties{"foo&bar": "%=baz", "?": "!"}},
 	}
 
 	for _, subtest := range tests {
-		have := make(properties)
+		have := make(Properties)
 		err := have.UnmarshalText([]byte(subtest.in))
 
 		if err != nil {
