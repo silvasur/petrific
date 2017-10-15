@@ -59,7 +59,7 @@ Wish list
 
 In no particular order:
 
-* Deletion of backups (needs a garbage collection algorithm to detect unused backups).
+* Deletion of backups (needs a garbage collection algorithm to detect unused objects).
 * Content-aware "blockification" of files. Right now, a file is simply split into 16MB large blocks. A content-aware splitting process could drastically reduce memory usage.
 * More tests.
 * Progress indicator of some sorts.
