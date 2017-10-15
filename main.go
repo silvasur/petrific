@@ -1,11 +1,11 @@
 package main
 
 import (
-	"code.laria.me/petrific/config"
-	"code.laria.me/petrific/storage"
-	"code.laria.me/petrific/storage/registry"
 	"flag"
 	"fmt"
+	"github.com/silvasur/petrific/config"
+	"github.com/silvasur/petrific/storage"
+	"github.com/silvasur/petrific/storage/registry"
 	"os"
 )
 

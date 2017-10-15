@@ -2,11 +2,11 @@ package backup
 
 import (
 	"bytes"
-	"code.laria.me/petrific/cache"
-	"code.laria.me/petrific/fs"
-	"code.laria.me/petrific/objects"
-	"code.laria.me/petrific/storage"
-	"code.laria.me/petrific/storage/memory"
+	"github.com/silvasur/petrific/cache"
+	"github.com/silvasur/petrific/fs"
+	"github.com/silvasur/petrific/objects"
+	"github.com/silvasur/petrific/storage"
+	"github.com/silvasur/petrific/storage/memory"
 	"testing"
 )
 

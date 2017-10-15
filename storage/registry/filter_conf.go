@@ -1,9 +1,9 @@
 package registry
 
 import (
-	"code.laria.me/petrific/config"
-	"code.laria.me/petrific/storage"
-	"code.laria.me/petrific/storage/filter"
+	"github.com/silvasur/petrific/config"
+	"github.com/silvasur/petrific/storage"
+	"github.com/silvasur/petrific/storage/filter"
 )
 
 // Unlike the other storage engines, we can not define FilterStorages

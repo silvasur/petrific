@@ -1,11 +1,11 @@
 package backup
 
 import (
-	"code.laria.me/petrific/acl"
-	"code.laria.me/petrific/fs"
-	"code.laria.me/petrific/objects"
-	"code.laria.me/petrific/storage"
 	"fmt"
+	"github.com/silvasur/petrific/acl"
+	"github.com/silvasur/petrific/fs"
+	"github.com/silvasur/petrific/objects"
+	"github.com/silvasur/petrific/storage"
 	"io"
 	"math/rand"
 	"os"

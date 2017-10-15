@@ -31,11 +31,11 @@
 package config
 
 import (
-	"code.laria.me/petrific/gpg"
 	"errors"
 	"fmt"
 	"github.com/BurntSushi/toml"
 	"github.com/adrg/xdg"
+	"github.com/silvasur/petrific/gpg"
 	"os"
 	"os/user"
 	"strings"

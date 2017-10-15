@@ -1,9 +1,9 @@
 package memory
 
 import (
-	"code.laria.me/petrific/config"
-	"code.laria.me/petrific/objects"
-	"code.laria.me/petrific/storage"
+	"github.com/silvasur/petrific/config"
+	"github.com/silvasur/petrific/objects"
+	"github.com/silvasur/petrific/storage"
 )
 
 // Memory storage is an in-memory storage. It is rather useless when using petrific, it is mostly used for internal testing.

@@ -1,7 +1,7 @@
 package backup
 
 import (
-	"code.laria.me/petrific/objects"
+	"github.com/silvasur/petrific/objects"
 )
 
 // Test tree

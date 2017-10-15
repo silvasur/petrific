@@ -1,13 +1,13 @@
 package registry
 
 import (
-	"code.laria.me/petrific/config"
-	"code.laria.me/petrific/storage"
-	"code.laria.me/petrific/storage/cloud"
-	"code.laria.me/petrific/storage/local"
-	"code.laria.me/petrific/storage/memory"
 	"errors"
 	"fmt"
+	"github.com/silvasur/petrific/config"
+	"github.com/silvasur/petrific/storage"
+	"github.com/silvasur/petrific/storage/cloud"
+	"github.com/silvasur/petrific/storage/local"
+	"github.com/silvasur/petrific/storage/memory"
 )
 
 // List af all available storage types

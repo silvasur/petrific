@@ -3,9 +3,9 @@ package objects
 import (
 	"bufio"
 	"bytes"
-	"code.laria.me/petrific/acl"
 	"errors"
 	"fmt"
+	"github.com/silvasur/petrific/acl"
 	"sort"
 )
 

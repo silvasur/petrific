@@ -10,7 +10,7 @@ It stores your files and directories as objects that are addressed with their cr
 Installation
 ------------
 
-You will need the [Go](https://www.golang.org) compiler, [git](https://www.git-scm.org) and [GPG](https://gnupg.org/) installed on your system. After that, installing petrific is as easy as `go get code.laria.me/petrific`.
+You will need the [Go](https://www.golang.org) compiler, [git](https://www.git-scm.org) and [GPG](https://gnupg.org/) installed on your system. After that, installing petrific is as easy as `go get github.com/silvasur/petrific`.
 
 Configuration & Usage
 ---------------------

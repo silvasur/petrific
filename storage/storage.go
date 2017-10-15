@@ -2,10 +2,10 @@ package storage
 
 import (
 	"bytes"
-	"code.laria.me/petrific/config"
-	"code.laria.me/petrific/objects"
 	"errors"
 	"fmt"
+	"github.com/silvasur/petrific/config"
+	"github.com/silvasur/petrific/objects"
 	"io"
 	"time"
 )
