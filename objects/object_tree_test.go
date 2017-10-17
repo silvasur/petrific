@@ -2,7 +2,7 @@ package objects
 
 import (
 	"bytes"
-	"github.com/silvasur/petrific/acl"
+	"code.laria.me/petrific/acl"
 	"testing"
 )
 

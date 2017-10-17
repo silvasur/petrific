@@ -2,9 +2,9 @@ package filter
 
 import (
 	"bytes"
+	"code.laria.me/petrific/objects"
+	"code.laria.me/petrific/storage"
 	"errors"
-	"github.com/silvasur/petrific/objects"
-	"github.com/silvasur/petrific/storage"
 	"os/exec"
 )
 

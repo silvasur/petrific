@@ -1,10 +1,10 @@
 package backup
 
 import (
-	"github.com/silvasur/petrific/cache"
-	"github.com/silvasur/petrific/fs"
-	"github.com/silvasur/petrific/objects"
-	"github.com/silvasur/petrific/storage"
+	"code.laria.me/petrific/cache"
+	"code.laria.me/petrific/fs"
+	"code.laria.me/petrific/objects"
+	"code.laria.me/petrific/storage"
 	"io"
 	"runtime"
 	"sort"

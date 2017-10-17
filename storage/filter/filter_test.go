@@ -2,8 +2,8 @@ package filter
 
 import (
 	"bytes"
-	"github.com/silvasur/petrific/backup"
-	"github.com/silvasur/petrific/storage/memory"
+	"code.laria.me/petrific/backup"
+	"code.laria.me/petrific/storage/memory"
 	"testing"
 )
 

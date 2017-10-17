@@ -1,9 +1,9 @@
 package cloud
 
 import (
+	"code.laria.me/petrific/config"
+	"code.laria.me/petrific/storage"
 	"github.com/ncw/swift"
-	"github.com/silvasur/petrific/config"
-	"github.com/silvasur/petrific/storage"
 	"time"
 )
 

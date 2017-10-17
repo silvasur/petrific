@@ -2,11 +2,11 @@ package local
 
 import (
 	"bytes"
+	"code.laria.me/petrific/config"
+	"code.laria.me/petrific/objects"
+	"code.laria.me/petrific/storage"
 	"encoding/hex"
 	"fmt"
-	"github.com/silvasur/petrific/config"
-	"github.com/silvasur/petrific/objects"
-	"github.com/silvasur/petrific/storage"
 	"io"
 	"os"
 	"strings"

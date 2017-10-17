@@ -1,15 +1,15 @@
 package main
 
 import (
+	"code.laria.me/petrific/backup"
+	"code.laria.me/petrific/cache"
+	"code.laria.me/petrific/fs"
+	"code.laria.me/petrific/gpg"
+	"code.laria.me/petrific/objects"
+	"code.laria.me/petrific/storage"
 	"errors"
 	"flag"
 	"fmt"
-	"github.com/silvasur/petrific/backup"
-	"github.com/silvasur/petrific/cache"
-	"github.com/silvasur/petrific/fs"
-	"github.com/silvasur/petrific/gpg"
-	"github.com/silvasur/petrific/objects"
-	"github.com/silvasur/petrific/storage"
 	"os"
 	"sort"
 	"time"

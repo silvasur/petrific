@@ -1,10 +1,10 @@
 package main
 
 import (
+	"code.laria.me/petrific/backup"
+	"code.laria.me/petrific/cache"
+	"code.laria.me/petrific/fs"
 	"fmt"
-	"github.com/silvasur/petrific/backup"
-	"github.com/silvasur/petrific/cache"
-	"github.com/silvasur/petrific/fs"
 	"os"
 	"path"
 )

@@ -2,8 +2,8 @@ package storage
 
 import (
 	"bufio"
+	"code.laria.me/petrific/objects"
 	"fmt"
-	"github.com/silvasur/petrific/objects"
 	"io"
 	"strings"
 )
