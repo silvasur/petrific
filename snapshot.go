@@ -2,7 +2,6 @@ package main
 
 import (
 	"code.laria.me/petrific/backup"
-	"code.laria.me/petrific/cache"
 	"code.laria.me/petrific/fs"
 	"code.laria.me/petrific/gpg"
 	"code.laria.me/petrific/objects"
@@ -115,7 +114,7 @@ func TakeSnapshot(args []string) int {
 		return 1
 	}
 
-	tree_id, err := backup.WriteDir(objectstore, dir_path, d, cache.NopCache{})
+	tree_id, err := backup.WriteDir(objectstore, dir_path, d, id_cache)
 	if err != nil {
 		errout(err)
 		return 1

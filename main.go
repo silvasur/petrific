@@ -1,6 +1,7 @@
 package main
 
 import (
+	"code.laria.me/petrific/cache"
 	"code.laria.me/petrific/config"
 	"code.laria.me/petrific/storage"
 	"code.laria.me/petrific/storage/registry"
@@ -44,6 +45,7 @@ var (
 
 var conf config.Config
 var objectstore storage.Storage
+var id_cache cache.Cache = cache.NopCache{}
 
 func main() {
 	os.Exit(Main())
@@ -64,6 +66,11 @@ func Main() int {
 	}
 	defer objectstore.Close()
 
+	if !loadCache(conf) {
+		return 1
+	}
+	defer id_cache.Close()
+
 	remaining := make([]string, 0)
 	for _, arg := range flag.Args() {
 		if arg != "" {
@@ -82,6 +89,22 @@ func Main() int {
 	}
 
 	return cmd(remaining[1:])
+}
+
+func loadCache(conf config.Config) bool {
+	if conf.CachePath == "" {
+		return true
+	}
+
+	file_cache := cache.NewFileCache(config.ExpandTilde(conf.CachePath))
+	if err := file_cache.Load(); err != nil {
+		fmt.Fprintf(os.Stderr, "Loading cache %s: %s", conf.CachePath, err)
+		return false
+	}
+
+	id_cache = file_cache
+
+	return true
 }
 
 func loadConfig() bool {

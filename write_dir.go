@@ -2,7 +2,6 @@ package main
 
 import (
 	"code.laria.me/petrific/backup"
-	"code.laria.me/petrific/cache"
 	"code.laria.me/petrific/fs"
 	"fmt"
 	"os"
@@ -46,7 +45,7 @@ func WriteDir(args []string) int {
 		return 1
 	}
 
-	id, err := backup.WriteDir(objectstore, dir_path, d, cache.NopCache{})
+	id, err := backup.WriteDir(objectstore, dir_path, d, id_cache)
 	if err != nil {
 		errout(err)
 		return 1

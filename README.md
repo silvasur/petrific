@@ -22,6 +22,9 @@ Here is a commented example config. For more details, consult the documentation 
 	# This config key defines the default storage backend, as defined below
 	default_storage = "local_encrypted"
 
+	# This defines the location of the cache file (can speed up creating backups; can be left out)
+	cache_path = "~/.cache/petrific.cache"
+
 	[signing]
 	# Use this GPG key to sign snapshots
 	key = "0123456789ABCDEF0123456789ABCDEF01234567"

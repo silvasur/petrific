@@ -11,6 +11,9 @@
 //    # This config key defines the default storage backend, as defined below ([storage.local_compressed])
 //    default_storage = "local_compressed"
 //
+//    # This defines the location of the cache file (can speed up creating backups; can be left out)
+//    cache_path = "~/.cache/petrific.cache"
+//
 //    [signing]
 //    # Use this GPG key to sign snapshots
 //    key = "0123456789ABCDEF0123456789ABCDEF01234567"
@@ -55,6 +58,7 @@ var (
 )
 
 type Config struct {
+	CachePath      string `toml:"cache_path,omitempty"`
 	DefaultStorage string `toml:"default_storage"`
 	Signing        struct {
 		Key string
