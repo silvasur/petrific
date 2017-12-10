@@ -14,7 +14,7 @@ import (
 	"time"
 )
 
-func createSnapshot(archive, comment string, tree_id objects.ObjectId, nosign bool) (objects.ObjectId, error) {
+func createSnapshot(env *Env, archive, comment string, tree_id objects.ObjectId, nosign bool) (objects.ObjectId, error) {
 	snapshot := objects.Snapshot{
 		Archive: archive,
 		Comment: comment,
@@ -28,7 +28,7 @@ func createSnapshot(archive, comment string, tree_id objects.ObjectId, nosign bo
 		payload = snapshot.Payload()
 	} else {
 		var err error
-		payload, err = snapshot.SignedPayload(conf.GPGSigner())
+		payload, err = snapshot.SignedPayload(env.Conf.GPGSigner())
 		if err != nil {
 			return objects.ObjectId{}, fmt.Errorf("could not sign: %s", err)
 		}
@@ -39,10 +39,10 @@ func createSnapshot(archive, comment string, tree_id objects.ObjectId, nosign bo
 		Payload: payload,
 	}
 
-	return storage.SetObject(objectstore, obj)
+	return storage.SetObject(env.Store, obj)
 }
 
-func CreateSnapshot(args []string) int {
+func CreateSnapshot(env *Env, args []string) int {
 	flags := flag.NewFlagSet(os.Args[0]+" create-snapshot", flag.ContinueOnError)
 	nosign := flags.Bool("nosign", false, "don't sign the snapshot (not recommended)")
 	comment := flags.String("comment", "", "comment for the snapshot")
@@ -68,7 +68,7 @@ func CreateSnapshot(args []string) int {
 		return 1
 	}
 
-	snapshot_id, err := createSnapshot(args[0], *comment, tree_id, *nosign)
+	snapshot_id, err := createSnapshot(env, args[0], *comment, tree_id, *nosign)
 	if err != nil {
 		errout(err)
 		return 1
@@ -78,7 +78,7 @@ func CreateSnapshot(args []string) int {
 	return 0
 }
 
-func TakeSnapshot(args []string) int {
+func TakeSnapshot(env *Env, args []string) int {
 	flags := flag.NewFlagSet(os.Args[0]+" take-snapshot", flag.ContinueOnError)
 	nosign := flags.Bool("nosign", false, "don't sign the snapshot (not recommended)")
 	comment := flags.String("comment", "", "comment for the snapshot")
@@ -114,13 +114,13 @@ func TakeSnapshot(args []string) int {
 		return 1
 	}
 
-	tree_id, err := backup.WriteDir(objectstore, dir_path, d, id_cache)
+	tree_id, err := backup.WriteDir(env.Store, dir_path, d, env.IdCache)
 	if err != nil {
 		errout(err)
 		return 1
 	}
 
-	snapshot_id, err := createSnapshot(args[0], *comment, tree_id, *nosign)
+	snapshot_id, err := createSnapshot(env, args[0], *comment, tree_id, *nosign)
 	if err != nil {
 		errout(err)
 		fmt.Fprintf(os.Stderr, "You can try again by running `%s create-snapshot -c '%s' '%s' '%s'\n`", os.Args[0], *comment, args[0], tree_id)
@@ -142,7 +142,7 @@ func (s sortableSnapshots) Len() int           { return len(s) }
 func (s sortableSnapshots) Less(i, j int) bool { return s[i].snapshot.Date.After(s[j].snapshot.Date) }
 func (s sortableSnapshots) Swap(i, j int)      { s[i], s[j] = s[j], s[i] }
 
-func ListSnapshots(args []string) int {
+func ListSnapshots(env *Env, args []string) int {
 	// usage := subcmdUsage("list-snapshots", "[archive]", nil)
 	errout := subcmdErrout("list-snapshots")
 
@@ -154,7 +154,7 @@ func ListSnapshots(args []string) int {
 		}
 	}
 
-	objids, err := objectstore.List(objects.OTSnapshot)
+	objids, err := env.Store.List(objects.OTSnapshot)
 	if err != nil {
 		errout(err)
 		return 1
@@ -164,7 +164,7 @@ func ListSnapshots(args []string) int {
 
 	failed := false
 	for _, objid := range objids {
-		_snapshot, err := storage.GetObjectOfType(objectstore, objid, objects.OTSnapshot)
+		_snapshot, err := storage.GetObjectOfType(env.Store, objid, objects.OTSnapshot)
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "warning: list-snapshots: could not get snapshot %s: %s\n", objid, err)
 			failed = true
@@ -192,7 +192,7 @@ func ListSnapshots(args []string) int {
 	return 0
 }
 
-func RestoreSnapshot(args []string) int {
+func RestoreSnapshot(env *Env, args []string) int {
 	var snapshotId objects.ObjectId
 	flags := flag.NewFlagSet("restore-snapshot", flag.ContinueOnError)
 	flags.Var(&snapshotId, "id", "Object id of a snapshot")
@@ -247,13 +247,13 @@ func RestoreSnapshot(args []string) int {
 	var snapshot *objects.Snapshot
 
 	if *archive != "" {
-		snapshot, err = storage.FindLatestSnapshot(objectstore, *archive)
+		snapshot, err = storage.FindLatestSnapshot(env.Store, *archive)
 		if err != nil {
 			errout(err)
 			return 1
 		}
 	} else {
-		_snapshot, err := storage.GetObjectOfType(objectstore, snapshotId, objects.OTSnapshot)
+		_snapshot, err := storage.GetObjectOfType(env.Store, snapshotId, objects.OTSnapshot)
 		if err != nil {
 			errout(err)
 			return 1
@@ -266,7 +266,7 @@ func RestoreSnapshot(args []string) int {
 		return 1
 	}
 
-	if err := backup.RestoreDir(objectstore, snapshot.Tree, root); err != nil {
+	if err := backup.RestoreDir(env.Store, snapshot.Tree, root); err != nil {
 		errout(err)
 		return 1
 	}

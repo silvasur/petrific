@@ -7,7 +7,7 @@ import (
 	"fmt"
 )
 
-func RestoreDir(args []string) int {
+func RestoreDir(env *Env, args []string) int {
 	usage := subcmdUsage("restore-dir", "directory object-id", nil)
 	errout := subcmdErrout("restore-dir")
 
@@ -39,7 +39,7 @@ func RestoreDir(args []string) int {
 		return 1
 	}
 
-	if err := backup.RestoreDir(objectstore, id, d); err != nil {
+	if err := backup.RestoreDir(env.Store, id, d); err != nil {
 		errout(err)
 		return 1
 	}

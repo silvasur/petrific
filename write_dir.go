@@ -19,7 +19,7 @@ func abspath(p string) (string, error) {
 	return path.Clean(p), nil
 }
 
-func WriteDir(args []string) int {
+func WriteDir(env *Env, args []string) int {
 	usage := subcmdUsage("write-dir", "directory", nil)
 	errout := subcmdErrout("write-dir")
 
@@ -45,7 +45,7 @@ func WriteDir(args []string) int {
 		return 1
 	}
 
-	id, err := backup.WriteDir(objectstore, dir_path, d, id_cache)
+	id, err := backup.WriteDir(env.Store, dir_path, d, env.IdCache)
 	if err != nil {
 		errout(err)
 		return 1
