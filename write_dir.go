@@ -21,7 +21,7 @@ func abspath(p string) (string, error) {
 
 func WriteDir(env *Env, args []string) int {
 	usage := subcmdUsage("write-dir", "directory", nil)
-	errout := subcmdErrout("write-dir")
+	errout := subcmdErrout(env.Log, "write-dir")
 
 	if len(args) != 1 {
 		usage()

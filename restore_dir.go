@@ -9,7 +9,7 @@ import (
 
 func RestoreDir(env *Env, args []string) int {
 	usage := subcmdUsage("restore-dir", "directory object-id", nil)
-	errout := subcmdErrout("restore-dir")
+	errout := subcmdErrout(env.Log, "restore-dir")
 
 	if len(args) != 2 {
 		usage()

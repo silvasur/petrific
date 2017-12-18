@@ -48,7 +48,7 @@ func CreateSnapshot(env *Env, args []string) int {
 	comment := flags.String("comment", "", "comment for the snapshot")
 
 	flags.Usage = subcmdUsage("create-snapshot", "[flags] archive tree-object", flags)
-	errout := subcmdErrout("create-snapshot")
+	errout := subcmdErrout(env.Log, "create-snapshot")
 
 	err := flags.Parse(args)
 	if err != nil {
@@ -84,7 +84,7 @@ func TakeSnapshot(env *Env, args []string) int {
 	comment := flags.String("comment", "", "comment for the snapshot")
 
 	flags.Usage = subcmdUsage("take-snapshot", "[flags] archive dir", flags)
-	errout := subcmdErrout("take-snapshot")
+	errout := subcmdErrout(env.Log, "take-snapshot")
 
 	if err := flags.Parse(args); err != nil {
 		errout(err)
@@ -123,7 +123,7 @@ func TakeSnapshot(env *Env, args []string) int {
 	snapshot_id, err := createSnapshot(env, args[0], *comment, tree_id, *nosign)
 	if err != nil {
 		errout(err)
-		fmt.Fprintf(os.Stderr, "You can try again by running `%s create-snapshot -c '%s' '%s' '%s'\n`", os.Args[0], *comment, args[0], tree_id)
+		env.Log.Error().Printf("You can try again by running `%s create-snapshot -c '%s' '%s' '%s'\n`", os.Args[0], *comment, args[0], tree_id)
 		return 1
 	}
 
@@ -144,7 +144,7 @@ func (s sortableSnapshots) Swap(i, j int)      { s[i], s[j] = s[j], s[i] }
 
 func ListSnapshots(env *Env, args []string) int {
 	// usage := subcmdUsage("list-snapshots", "[archive]", nil)
-	errout := subcmdErrout("list-snapshots")
+	errout := subcmdErrout(env.Log, "list-snapshots")
 
 	filter := func(s objects.Snapshot) bool { return true }
 	if len(args) > 0 {
@@ -166,7 +166,7 @@ func ListSnapshots(env *Env, args []string) int {
 	for _, objid := range objids {
 		_snapshot, err := storage.GetObjectOfType(env.Store, objid, objects.OTSnapshot)
 		if err != nil {
-			fmt.Fprintf(os.Stderr, "warning: list-snapshots: could not get snapshot %s: %s\n", objid, err)
+			env.Log.Warn().Printf("list-snapshots: could not get snapshot %s: %s\n", objid, err)
 			failed = true
 			continue
 		}
@@ -199,7 +199,7 @@ func RestoreSnapshot(env *Env, args []string) int {
 	archive := flags.String("archive", "", "Get latest snapshot for this archive")
 
 	flags.Usage = subcmdUsage("restore-snapshot", "[flags] directory", flags)
-	errout := subcmdErrout("restore-snapshot")
+	errout := subcmdErrout(env.Log, "restore-snapshot")
 
 	err := flags.Parse(args)
 	if err != nil {

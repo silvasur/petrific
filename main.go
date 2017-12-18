@@ -1,6 +1,7 @@
 package main
 
 import (
+	"code.laria.me/petrific/logging"
 	"flag"
 	"fmt"
 	"os"
@@ -27,16 +28,17 @@ func subcmdUsage(name string, usage string, flags *flag.FlagSet) func() {
 	}
 }
 
-func subcmdErrout(name string) func(error) {
+func subcmdErrout(log *logging.Log, name string) func(error) {
 	return func(err error) {
-		fmt.Fprintf(os.Stderr, "%s: %s\n", name, err)
+		log.Error().Printf("%s: %s\n", name, err)
 	}
 }
 
 // Global flags
 var (
-	flagConfPath = flag.String("config", "", "Use this config file instead of the default")
-	flagStorage  = flag.String("storage", "", "Operate on this storage instead of the default one")
+	flagConfPath  = flag.String("config", "", "Use this config file instead of the default")
+	flagStorage   = flag.String("storage", "", "Operate on this storage instead of the default one")
+	flagVerbosity = flag.Int("verbosity", int(logging.LWarn), "Verbosity level (0: quiet, 4: everything)")
 )
 
 func main() {
@@ -54,9 +56,15 @@ func Main() int {
 	}
 	flag.Parse()
 
-	env, err := NewEnv(*flagConfPath, *flagStorage)
+	log, err := createLogger(logging.Level(*flagVerbosity))
 	if err != nil {
 		fmt.Fprintln(os.Stderr, err)
+		return 1
+	}
+
+	env, err := NewEnv(log, *flagConfPath, *flagStorage)
+	if err != nil {
+		log.Error().Println(err)
 		return 1
 	}
 	defer env.Close()
@@ -79,4 +87,13 @@ func Main() int {
 	}
 
 	return cmd(env, remaining[1:])
+}
+
+func createLogger(level logging.Level) (log *logging.Log, err error) {
+	if level < logging.LQuiet || level > logging.LDebug {
+		level = logging.LDebug
+		return nil, fmt.Errorf("verbosity %d is out of range", level)
+	}
+
+	return logging.NewLog(os.Stderr, level), nil
 }

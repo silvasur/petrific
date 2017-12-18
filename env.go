@@ -3,6 +3,7 @@ package main
 import (
 	"code.laria.me/petrific/cache"
 	"code.laria.me/petrific/config"
+	"code.laria.me/petrific/logging"
 	"code.laria.me/petrific/storage"
 	"code.laria.me/petrific/storage/registry"
 	"fmt"
@@ -13,6 +14,7 @@ type Env struct {
 	Conf    config.Config
 	Store   storage.Storage
 	IdCache cache.Cache
+	Log     *logging.Log
 }
 
 func (e *Env) Close() {
@@ -40,8 +42,9 @@ func (env *Env) loadCache() error {
 	return nil
 }
 
-func NewEnv(confPath, storageName string) (*Env, error) {
+func NewEnv(log *logging.Log, confPath, storageName string) (*Env, error) {
 	env := new(Env)
+	env.Log = log
 
 	var err error
 
