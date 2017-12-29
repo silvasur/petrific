@@ -108,7 +108,7 @@ func (proc writeDirProcess) writeDir(
 
 		switch c.Type() {
 		case fs.FFile:
-			mtime, file_id, ok := pcache.PathUpdated(abspath)
+			mtime, file_id, ok := pcache.PathUpdated(abspath + "/" + c.Name())
 			if !ok || mtime.Before(c.ModTime()) {
 				// According to cache the file was changed
 

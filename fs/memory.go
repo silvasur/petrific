@@ -9,7 +9,7 @@ import (
 )
 
 type memfsBase struct {
-	parent *memfsDir
+	parent *MemfsDir
 	name   string
 	exec   bool
 	mtime  time.Time
@@ -33,41 +33,43 @@ func (b memfsBase) Delete() error {
 	return nil
 }
 
-type memfsFile struct {
+type MemfsFile struct {
 	memfsBase
-	content *bytes.Buffer
+	content     *bytes.Buffer
+	HasBeenRead bool
 }
 
-func (memfsFile) Type() FileType { return FFile }
+func (MemfsFile) Type() FileType { return FFile }
 
-func (f memfsFile) Open() (io.ReadCloser, error) {
+func (f *MemfsFile) Open() (io.ReadCloser, error) {
 	return f, nil
 }
 
-func (f memfsFile) OpenWritable() (io.WriteCloser, error) {
+func (f MemfsFile) OpenWritable() (io.WriteCloser, error) {
 	return f, nil
 }
 
-func (f memfsFile) Read(p []byte) (int, error) {
+func (f *MemfsFile) Read(p []byte) (int, error) {
+	f.HasBeenRead = true
 	return f.content.Read(p)
 }
 
-func (f memfsFile) Write(p []byte) (int, error) {
+func (f MemfsFile) Write(p []byte) (int, error) {
 	return f.content.Write(p)
 }
 
-func (memfsFile) Close() error {
+func (MemfsFile) Close() error {
 	return nil
 }
 
-type memfsDir struct {
+type MemfsDir struct {
 	memfsBase
 	children map[string]memfsChild
 }
 
-func (memfsDir) Type() FileType { return FDir }
+func (MemfsDir) Type() FileType { return FDir }
 
-func (d memfsDir) Readdir() ([]File, error) {
+func (d MemfsDir) Readdir() ([]File, error) {
 	l := make([]File, 0, len(d.children))
 
 	for _, f := range d.children {
@@ -77,7 +79,7 @@ func (d memfsDir) Readdir() ([]File, error) {
 	return l, nil
 }
 
-func (d memfsDir) GetChild(name string) (File, error) {
+func (d MemfsDir) GetChild(name string) (File, error) {
 	c, ok := d.children[name]
 	if !ok {
 		return nil, os.ErrNotExist
@@ -85,7 +87,7 @@ func (d memfsDir) GetChild(name string) (File, error) {
 	return c, nil
 }
 
-func (d memfsDir) createChildBase(name string, exec bool) memfsBase {
+func (d MemfsDir) createChildBase(name string, exec bool) memfsBase {
 	return memfsBase{
 		parent: &d,
 		name:   name,
@@ -94,8 +96,8 @@ func (d memfsDir) createChildBase(name string, exec bool) memfsBase {
 	}
 }
 
-func (d memfsDir) CreateChildFile(name string, exec bool) (RegularFile, error) {
-	child := memfsFile{
+func (d MemfsDir) CreateChildFile(name string, exec bool) (RegularFile, error) {
+	child := MemfsFile{
 		memfsBase: d.createChildBase(name, exec),
 		content:   new(bytes.Buffer),
 	}
@@ -103,8 +105,8 @@ func (d memfsDir) CreateChildFile(name string, exec bool) (RegularFile, error) {
 	return &child, nil
 }
 
-func (d memfsDir) CreateChildDir(name string) (Dir, error) {
-	child := memfsDir{
+func (d MemfsDir) CreateChildDir(name string) (Dir, error) {
+	child := MemfsDir{
 		memfsBase: d.createChildBase(name, true),
 		children:  make(map[string]memfsChild),
 	}
@@ -112,8 +114,8 @@ func (d memfsDir) CreateChildDir(name string) (Dir, error) {
 	return &child, nil
 }
 
-func (d memfsDir) CreateChildSymlink(name string, target string) (Symlink, error) {
-	child := memfsSymlink{
+func (d MemfsDir) CreateChildSymlink(name string, target string) (Symlink, error) {
+	child := MemfsSymlink{
 		memfsBase: d.createChildBase(name, false),
 		target:    target,
 	}
@@ -121,11 +123,11 @@ func (d memfsDir) CreateChildSymlink(name string, target string) (Symlink, error
 	return &child, nil
 }
 
-func (d *memfsDir) deleteChild(name string) {
+func (d *MemfsDir) deleteChild(name string) {
 	delete(d.children, name)
 }
 
-func (d *memfsDir) RenameChild(oldname, newname string) error {
+func (d *MemfsDir) RenameChild(oldname, newname string) error {
 	c, ok := d.children[oldname]
 	if !ok {
 		return os.ErrNotExist
@@ -140,7 +142,7 @@ func (d *memfsDir) RenameChild(oldname, newname string) error {
 }
 
 func NewMemoryFSRoot(name string) Dir {
-	return &memfsDir{
+	return &MemfsDir{
 		memfsBase: memfsBase{
 			parent: nil,
 			name:   name,
@@ -151,13 +153,13 @@ func NewMemoryFSRoot(name string) Dir {
 	}
 }
 
-type memfsSymlink struct {
+type MemfsSymlink struct {
 	memfsBase
 	target string
 }
 
-func (memfsSymlink) Type() FileType { return FSymlink }
+func (MemfsSymlink) Type() FileType { return FSymlink }
 
-func (s memfsSymlink) Readlink() (string, error) {
+func (s MemfsSymlink) Readlink() (string, error) {
 	return s.target, nil
 }
