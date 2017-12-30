@@ -81,7 +81,7 @@ func LoadConfig(path string) (config Config, err error) {
 }
 
 func (c Config) GPGSigner() gpg.Signer {
-	return gpg.Signer{c.Signing.Key}
+	return gpg.Signer{Key: c.Signing.Key}
 }
 
 func (c Config) GetStorageMethod(name string) (string, error) {
