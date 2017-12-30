@@ -29,7 +29,7 @@ func wantFileWithContent(want []byte, exec bool) func(*testing.T, fs.File) {
 		rf := f.(fs.RegularFile)
 
 		if rf.Executable() != exec {
-			t.Errorf("Child '%s' has executable bit %b, expected %b", f.Name(), rf.Executable(), exec)
+			t.Errorf("Child '%s' has executable bit %t, expected %t", f.Name(), rf.Executable(), exec)
 		}
 
 		rwc, err := rf.Open()
@@ -40,7 +40,7 @@ func wantFileWithContent(want []byte, exec bool) func(*testing.T, fs.File) {
 
 		buf := new(bytes.Buffer)
 		if _, err := io.Copy(buf, rwc); err != nil {
-			t.Errorf("Could not read content of child '%s': %s", err)
+			t.Errorf("Could not read content of child '%s': %s", f.Name(), err)
 			return
 		}
 

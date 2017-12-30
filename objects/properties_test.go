@@ -34,7 +34,7 @@ func TestPropertyMarshalling(t *testing.T) {
 	for _, subtest := range tests {
 		have, err := subtest.in.MarshalText()
 		if err != nil {
-			t.Errorf("%s: Got an error: %s", err)
+			t.Errorf("%s: Got an error: %s", subtest.name, err)
 			continue
 		}
 
@@ -61,7 +61,7 @@ func TestPropertyUnmarshalling(t *testing.T) {
 		err := have.UnmarshalText([]byte(subtest.in))
 
 		if err != nil {
-			t.Errorf("%s: Got an error: %s", err)
+			t.Errorf("%s: Got an error: %s", subtest.name, err)
 			continue
 		}
 

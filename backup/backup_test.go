@@ -24,7 +24,7 @@ func wantObject(
 	}
 
 	if !bytes.Equal(want, have) {
-		t.Errorf("Wrong result for %s: (size=%d) %#s", id, len(have), have)
+		t.Errorf("Wrong result for %s: (size=%d) %#v", id, len(have), have)
 	}
 }
 
