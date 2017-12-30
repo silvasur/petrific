@@ -45,7 +45,7 @@ func WriteDir(env *Env, args []string) int {
 		return 1
 	}
 
-	id, err := backup.WriteDir(env.Store, dir_path, d, env.IdCache)
+	id, err := backup.WriteDir(env.Store, dir_path, d, env.IdCache, env.Log)
 	if err != nil {
 		errout(err)
 		return 1

@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"code.laria.me/petrific/cache"
 	"code.laria.me/petrific/fs"
+	"code.laria.me/petrific/logging"
 	"code.laria.me/petrific/objects"
 	"code.laria.me/petrific/storage"
 	"code.laria.me/petrific/storage/memory"
@@ -80,7 +81,7 @@ func TestWriteDir(t *testing.T) {
 		t.Fatalf("Failed creating dir: %s", err)
 	}
 
-	id, err := WriteDir(s, "", root, cache.NopCache{})
+	id, err := WriteDir(s, "", root, cache.NopCache{}, logging.NewNopLog())
 	if err != nil {
 		t.Fatalf("Could not WriteDir: %s", err)
 	}

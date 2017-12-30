@@ -3,6 +3,7 @@ package backup
 import (
 	"code.laria.me/petrific/cache"
 	"code.laria.me/petrific/fs"
+	"code.laria.me/petrific/logging"
 	"code.laria.me/petrific/objects"
 	"code.laria.me/petrific/storage"
 	"io"
@@ -28,9 +29,11 @@ type writeFileTask struct {
 	result *chan writeFileTaskResult
 }
 
-func (task writeFileTask) process(store storage.Storage) {
+func (task writeFileTask) process(proc writeDirProcess) {
 	var result writeFileTaskResult
 	result.file = task.file
+
+	proc.log.Info().Printf("start writing file %s", task.file.Name())
 
 	rwc, err := task.file.Open()
 	if err != nil {
@@ -40,7 +43,9 @@ func (task writeFileTask) process(store storage.Storage) {
 	}
 	defer rwc.Close()
 
-	result.file_id, result.err = WriteFile(store, rwc)
+	result.file_id, result.err = WriteFile(proc.store, rwc)
+
+	proc.log.Info().Printf("finished writing file %s", task.file.Name())
 
 	*(task.result) <- result
 }
@@ -48,11 +53,12 @@ func (task writeFileTask) process(store storage.Storage) {
 type writeDirProcess struct {
 	queue chan writeFileTask
 	store storage.Storage
+	log   *logging.Log
 }
 
 func (proc writeDirProcess) worker() {
 	for task := range proc.queue {
-		task.process(proc.store)
+		task.process(proc)
 	}
 }
 
@@ -71,10 +77,12 @@ func WriteDir(
 	abspath string,
 	d fs.Dir,
 	pcache cache.Cache,
+	log *logging.Log,
 ) (objects.ObjectId, error) {
 	proc := writeDirProcess{
 		make(chan writeFileTask),
 		store,
+		log,
 	}
 	defer proc.stop()
 
@@ -90,6 +98,8 @@ func (proc writeDirProcess) writeDir(
 	d fs.Dir,
 	pcache cache.Cache,
 ) (objects.ObjectId, error) {
+	proc.log.Info().Printf("start writeDir for %s", abspath)
+
 	_children, err := d.Readdir()
 	if err != nil {
 		return objects.ObjectId{}, err
@@ -104,11 +114,15 @@ func (proc writeDirProcess) writeDir(
 
 	infos := make(objects.Tree)
 	for _, c := range children {
+		proc.log.Info().Printf("processing %s (%s) in %s", c.Name(), c.Type(), abspath)
+
 		var info objects.TreeEntry = nil
 
 		switch c.Type() {
 		case fs.FFile:
 			mtime, file_id, ok := pcache.PathUpdated(abspath + "/" + c.Name())
+			proc.log.Debug().Printf("cache info for %s: %s, %s, %t", abspath+"/"+c.Name(), mtime, file_id, ok)
+
 			if !ok || mtime.Before(c.ModTime()) {
 				// According to cache the file was changed
 
@@ -159,6 +173,7 @@ func (proc writeDirProcess) writeDir(
 		return objects.ObjectId{}, err
 	}
 
+	proc.log.Info().Printf("finishing writeDir for %s", abspath)
 	return storage.SetObject(proc.store, objects.ToRawObject(infos))
 }
 

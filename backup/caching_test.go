@@ -3,6 +3,7 @@ package backup
 import (
 	"code.laria.me/petrific/cache"
 	"code.laria.me/petrific/fs"
+	"code.laria.me/petrific/logging"
 	"code.laria.me/petrific/objects"
 	"code.laria.me/petrific/storage/memory"
 	"testing"
@@ -20,7 +21,7 @@ func TestCacheMTime(t *testing.T) {
 	}
 
 	want := file.ModTime()
-	if _, err := WriteDir(st, "/foo", filesys, c); err != nil {
+	if _, err := WriteDir(st, "/foo", filesys, c, logging.NewNopLog()); err != nil {
 		t.Fatal(err)
 	}
 
@@ -52,7 +53,7 @@ func TestCacheRetrieve(t *testing.T) {
 	mtime := file.ModTime().Add(1 * time.Hour)
 	c.SetPathUpdated("/foo/bar", mtime, objid_emptyfile)
 
-	if _, err := WriteDir(st, "/foo", filesys, c); err != nil {
+	if _, err := WriteDir(st, "/foo", filesys, c, logging.NewNopLog()); err != nil {
 		t.Fatal(err)
 	}
 

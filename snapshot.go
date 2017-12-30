@@ -114,7 +114,7 @@ func TakeSnapshot(env *Env, args []string) int {
 		return 1
 	}
 
-	tree_id, err := backup.WriteDir(env.Store, dir_path, d, env.IdCache)
+	tree_id, err := backup.WriteDir(env.Store, dir_path, d, env.IdCache, env.Log)
 	if err != nil {
 		errout(err)
 		return 1

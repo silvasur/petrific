@@ -54,3 +54,13 @@ func NewLog(out io.Writer, level Level) *Log {
 
 	return l
 }
+
+// NewNopLog creates a logger that is completly silent / doesn't log on any log level
+func NewNopLog() *Log {
+	return &Log{
+		NopLogger{},
+		NopLogger{},
+		NopLogger{},
+		NopLogger{},
+	}
+}
