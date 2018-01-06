@@ -16,6 +16,7 @@ var subcmds = map[string]subcmd{
 	"create-snapshot":  CreateSnapshot,
 	"list-snapshots":   ListSnapshots,
 	"restore-snapshot": RestoreSnapshot,
+	"fsck":             Fsck,
 }
 
 func subcmdUsage(name string, usage string, flags *flag.FlagSet) func() {
