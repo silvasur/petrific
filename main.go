@@ -4,7 +4,9 @@ import (
 	"code.laria.me/petrific/logging"
 	"flag"
 	"fmt"
+	"math/rand"
 	"os"
+	"time"
 )
 
 type subcmd func(env *Env, args []string) int
@@ -47,6 +49,8 @@ func main() {
 }
 
 func Main() int {
+	rand.Seed(time.Now().UnixNano())
+
 	flag.Usage = func() {
 		fmt.Fprintf(os.Stderr, "Usage: %s [global flags] command\n\nAvailable commands:\n", os.Args[0])
 		for cmd := range subcmds {
