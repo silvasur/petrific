@@ -35,7 +35,7 @@ func (problem FsckProblem) String() string {
 	case FsckDeserializationError:
 		desc = fmt.Sprintf("Object could not be deserialized: %s", problem.Err)
 	case FsckUnexpectedBlobSize:
-		desc = fmt.Sprintf("Unexpected blob size: have %d, want %s", problem.HaveSize, problem.WantSize)
+		desc = fmt.Sprintf("Unexpected blob size: have %d, want %d", problem.HaveSize, problem.WantSize)
 	}
 
 	ancestors := make([]string, len(problem.Ancestors))
