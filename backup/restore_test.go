@@ -3,6 +3,7 @@ package backup
 import (
 	"bytes"
 	"code.laria.me/petrific/fs"
+	"code.laria.me/petrific/logging"
 	"code.laria.me/petrific/objects"
 	"code.laria.me/petrific/storage/memory"
 	"io"
@@ -82,7 +83,7 @@ func TestRestoreDir(t *testing.T) {
 
 	root := fs.NewMemoryFSRoot("")
 
-	if err := RestoreDir(s, objid_testtree, root); err != nil {
+	if err := RestoreDir(s, objid_testtree, root, logging.NewNopLog()); err != nil {
 		t.Fatalf("Unexpected error from RestoreDir(): %s", err)
 	}
 

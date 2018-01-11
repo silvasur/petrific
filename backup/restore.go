@@ -3,6 +3,7 @@ package backup
 import (
 	"code.laria.me/petrific/acl"
 	"code.laria.me/petrific/fs"
+	"code.laria.me/petrific/logging"
 	"code.laria.me/petrific/objects"
 	"code.laria.me/petrific/storage"
 	"fmt"
@@ -40,13 +41,15 @@ func execBitFromACL(a acl.ACL) bool {
 	return a.ToUnixPerms()&0100 != 0
 }
 
-func RestoreDir(s storage.Storage, id objects.ObjectId, root fs.Dir) error {
+func RestoreDir(s storage.Storage, id objects.ObjectId, root fs.Dir, log *logging.Log) error {
 	tree_obj, err := storage.GetObjectOfType(s, id, objects.OTTree)
 	tree := tree_obj.(objects.Tree)
 
 	seen := make(map[string]struct{})
 
 	for name, file_info := range tree {
+		log.Info().Printf("restoring %s %s", name, file_info.Type())
+
 		switch file_info.Type() {
 		case objects.TETFile:
 			tmpname := fmt.Sprintf(".petrific-%d-%08x%08x%08x%08x", os.Getpid(), rand.Uint32(), rand.Uint32(), rand.Uint32(), rand.Uint32())
@@ -94,7 +97,7 @@ func RestoreDir(s storage.Storage, id objects.ObjectId, root fs.Dir) error {
 				}
 			}
 
-			if err := RestoreDir(s, file_info.(objects.TreeEntryDir).Ref, subdir); err != nil {
+			if err := RestoreDir(s, file_info.(objects.TreeEntryDir).Ref, subdir, log); err != nil {
 				return err
 			}
 		case objects.TETSymlink:

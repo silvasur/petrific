@@ -39,7 +39,7 @@ func RestoreDir(env *Env, args []string) int {
 		return 1
 	}
 
-	if err := backup.RestoreDir(env.Store, id, d); err != nil {
+	if err := backup.RestoreDir(env.Store, id, d, env.Log); err != nil {
 		errout(err)
 		return 1
 	}

@@ -266,7 +266,7 @@ func RestoreSnapshot(env *Env, args []string) int {
 		return 1
 	}
 
-	if err := backup.RestoreDir(env.Store, snapshot.Tree, root); err != nil {
+	if err := backup.RestoreDir(env.Store, snapshot.Tree, root, env.Log); err != nil {
 		errout(err)
 		return 1
 	}
