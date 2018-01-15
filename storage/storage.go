@@ -3,6 +3,7 @@ package storage
 import (
 	"bytes"
 	"code.laria.me/petrific/config"
+	"code.laria.me/petrific/logging"
 	"code.laria.me/petrific/objects"
 	"errors"
 	"fmt"
@@ -14,11 +15,15 @@ var (
 	ObjectNotFound = errors.New("Object not found")
 )
 
+type StorageSubcmd func(args []string, log *logging.Log, conf config.Config) int
+
 type Storage interface {
 	Get(id objects.ObjectId) ([]byte, error)
 	Has(id objects.ObjectId) (bool, error)
 	Set(id objects.ObjectId, typ objects.ObjectType, raw []byte) error
 	List(typ objects.ObjectType) ([]objects.ObjectId, error)
+
+	Subcmds() map[string]StorageSubcmd
 
 	Close() error
 }

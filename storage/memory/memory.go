@@ -55,6 +55,10 @@ func (ms MemoryStorage) List(typ objects.ObjectType) ([]objects.ObjectId, error)
 	return ms.bytype[typ], nil
 }
 
+func (MemoryStorage) Subcmds() map[string]storage.StorageSubcmd {
+	return make(map[string]storage.StorageSubcmd)
+}
+
 func (MemoryStorage) Close() error {
 	return nil
 }

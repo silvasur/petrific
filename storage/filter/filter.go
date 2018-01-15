@@ -87,6 +87,10 @@ func (filt FilterStorage) List(typ objects.ObjectType) ([]objects.ObjectId, erro
 	return filt.Base.List(typ)
 }
 
+func (filt FilterStorage) Subcmds() map[string]storage.StorageSubcmd {
+	return filt.Base.Subcmds()
+}
+
 func (filt FilterStorage) Close() error {
 	return filt.Base.Close()
 }

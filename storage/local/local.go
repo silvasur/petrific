@@ -128,6 +128,10 @@ func (l LocalStorage) List(typ objects.ObjectType) ([]objects.ObjectId, error) {
 	return l.index.List(typ), nil
 }
 
+func (LocalStorage) Subcmds() map[string]storage.StorageSubcmd {
+	return make(map[string]storage.StorageSubcmd)
+}
+
 func (l LocalStorage) Close() error {
 	f, err := os.Create(joinPath(l.Path, "index"))
 	if err != nil {
