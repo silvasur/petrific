@@ -21,7 +21,7 @@ func Fsck(env *Env, args []string) int {
 
 	var fsck_id *objects.ObjectId = nil
 
-	if len(flags.Args()) > 1 {
+	if len(flags.Args()) > 0 {
 		id, err := objects.ParseObjectId(flags.Args()[0])
 		if err != nil {
 			env.Log.Error().Printf("Could not parse object id: %s", err)
