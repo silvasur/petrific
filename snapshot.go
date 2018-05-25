@@ -123,7 +123,7 @@ func TakeSnapshot(env *Env, args []string) int {
 	snapshot_id, err := createSnapshot(env, args[0], *comment, tree_id, *nosign)
 	if err != nil {
 		errout(err)
-		env.Log.Error().Printf("You can try again by running `%s create-snapshot -c '%s' '%s' '%s'\n`", os.Args[0], *comment, args[0], tree_id)
+		env.Log.Error().Printf("You can try again by running `%s create-snapshot -comment '%s' '%s' '%s'\n`", os.Args[0], *comment, args[0], tree_id)
 		return 1
 	}
 
